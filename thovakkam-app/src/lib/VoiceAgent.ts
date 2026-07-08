@@ -14,6 +14,7 @@ class VoiceAgent {
   private isSpeaking: boolean = false;
   private activeUtterance: SpeechSynthesisUtterance | null = null;
   private voicesLoadedPromise: Promise<SpeechSynthesisVoice[]> | null = null;
+  private activeAudio: HTMLAudioElement | null = null;
 
   public onListeningStateChange: ((isListening: boolean) => void) | null = null;
   public onSpeakingStateChange: ((isSpeaking: boolean) => void) | null = null;
@@ -134,12 +135,77 @@ class VoiceAgent {
     }
   }
 
-  // Speaks text aloud using SpeechSynthesis with fallback retries if a specific voice fails
+  // Speaks text aloud using SpeechSynthesis, falling back to online TTS if no Tamil voice is available
   public async speak(text: string): Promise<void> {
     if (this.voicesLoadedPromise) {
       await this.voicesLoadedPromise;
     }
+
+    let hasTamilVoice = false;
+    if (this.synthesis) {
+      const voices = this.synthesis.getVoices();
+      const tamilVoices = voices.filter((v) => v.lang.toLowerCase().startsWith("ta"));
+      if (tamilVoices.length > 0) {
+        hasTamilVoice = true;
+      }
+    }
+
+    if (!hasTamilVoice && typeof window !== "undefined") {
+      console.log("No Tamil SpeechSynthesis voices found. Falling back to Google Translate TTS API.");
+      return this.playGoogleTTS(text);
+    }
+
     return this.speakWithRetry(text, 0);
+  }
+
+  private playGoogleTTS(text: string): Promise<void> {
+    return new Promise((resolve) => {
+      try {
+        this.stopListening();
+        this.stopSpeaking(); // clean up any running speaking instances
+
+        // Clean up text for speech
+        const cleanText = text.replace(/\[([^\]]+)\]\([^)]+\)/g, "$1").replace(/[*#_`]/g, "");
+
+        // Create Google Translate TTS URL (splits by language, fallback to 'ta' for Tamil)
+        const langCode = this.locale.split("-")[0];
+        const url = `https://translate.google.com/translate_tts?ie=UTF-8&tl=${langCode}&client=tw-ob&q=${encodeURIComponent(cleanText)}`;
+
+        this.isSpeaking = true;
+        if (this.onSpeakingStateChange) this.onSpeakingStateChange(true);
+
+        const audio = new Audio(url);
+        this.activeAudio = audio;
+
+        audio.onended = () => {
+          this.isSpeaking = false;
+          if (this.onSpeakingStateChange) this.onSpeakingStateChange(false);
+          this.activeAudio = null;
+          resolve();
+        };
+
+        audio.onerror = (err) => {
+          console.warn("Google TTS audio playback failed:", err);
+          this.isSpeaking = false;
+          if (this.onSpeakingStateChange) this.onSpeakingStateChange(false);
+          this.activeAudio = null;
+          resolve();
+        };
+
+        audio.play().catch((err) => {
+          console.warn("Failed to play Google TTS audio (requires user interaction first):", err);
+          this.isSpeaking = false;
+          if (this.onSpeakingStateChange) this.onSpeakingStateChange(false);
+          this.activeAudio = null;
+          resolve();
+        });
+      } catch (err) {
+        console.warn("Error setting up Google TTS:", err);
+        this.isSpeaking = false;
+        if (this.onSpeakingStateChange) this.onSpeakingStateChange(false);
+        resolve();
+      }
+    });
   }
 
   private speakWithRetry(text: string, attempt: number): Promise<void> {
@@ -252,9 +318,17 @@ class VoiceAgent {
   public stopSpeaking(): void {
     if (this.synthesis) {
       this.synthesis.cancel();
-      this.isSpeaking = false;
-      if (this.onSpeakingStateChange) this.onSpeakingStateChange(false);
     }
+    if (this.activeAudio) {
+      try {
+        this.activeAudio.pause();
+      } catch (err) {
+        console.warn("Error pausing active audio:", err);
+      }
+      this.activeAudio = null;
+    }
+    this.isSpeaking = false;
+    if (this.onSpeakingStateChange) this.onSpeakingStateChange(false);
   }
 
   public cancelAll(): void {
