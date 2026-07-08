@@ -1,0 +1,68 @@
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Scheme {
+  id                   String        @id @default(uuid())
+  name                 String
+  description          String
+  eligibilityRules     String        // JSON string storing eligibility rules (age range, income ceiling, flags)
+  benefits             String
+  requiredDocuments    String        // JSON array of strings
+  applicationProcedure String
+  lastDate             String?
+  department           String
+  officialLink         String?
+  category             String
+  isActive             Boolean       @default(true)
+  createdAt            DateTime      @default(now())
+  updatedAt            DateTime      @updatedAt
+  applications         Application[]
+}
+
+model User {
+  id               String        @id @default(uuid())
+  phone            String        @unique
+  name             String?
+  age              Int?
+  district         String?
+  education        String?
+  occupation       String?
+  annualIncome     Float?
+  disabilityStatus Boolean?      @default(false)
+  isStudent        Boolean?      @default(false)
+  isFarmer         Boolean?      @default(false)
+  gender           String?
+  isSeniorCitizen  Boolean?      @default(false)
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+  applications     Application[]
+}
+
+model Application {
+  id          String   @id @default(uuid())
+  userId      String
+  schemeId    String
+  status      String   @default("pending") // pending, under_review, approved, rejected, documents_requested
+  documents   String   // JSON string representing array of uploaded document paths/urls
+  submittedAt DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  scheme      Scheme   @relation(fields: [schemeId], references: [id], onDelete: Cascade)
+}
+
+model Admin {
+  id        String   @id @default(uuid())
+  username  String   @unique
+  password  String
+  name      String
+  role      String   // super_admin, district_officer, reviewer
+  district  String?  // nullable, scoped for district_officer
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

@@ -1,0 +1,5 @@
+# Ignore local Node.js binaries and downloads
+/node/
+node-*.zip
+*.zip
+temp_node/
