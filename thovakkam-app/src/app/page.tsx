@@ -216,6 +216,40 @@ export default function CitizenPortal() {
     }
   };
 
+  // Support physical keyboard inputs for phone and OTP screens
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (step === "auth") {
+        if (e.key >= "0" && e.key <= "9") {
+          if (phone.length < 10) {
+            setPhone(prev => prev + e.key);
+            speakTamil(e.key);
+          }
+        } else if (e.key === "Backspace") {
+          setPhone(prev => prev.slice(0, -1));
+        } else if (e.key === "Enter" && phone.length === 10) {
+          handleSendOtp();
+        }
+      } else if (step === "otp") {
+        if (e.key >= "0" && e.key <= "9") {
+          if (otp.length < 4) {
+            setOtp(prev => prev + e.key);
+            speakTamil(e.key);
+          }
+        } else if (e.key === "Backspace") {
+          setOtp(prev => prev.slice(0, -1));
+        } else if (e.key === "Enter" && otp.length === 4) {
+          handleVerifyOtp();
+        }
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [step, phone, otp]);
+
   // START NEW CONVERSATION
   const startConversation = () => {
     setProfile({});
