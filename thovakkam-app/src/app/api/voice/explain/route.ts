@@ -1,8 +1,6 @@
 import { NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
 import Anthropic from "@anthropic-ai/sdk";
-
-const prisma = new PrismaClient();
+import prisma from "@/lib/prisma";
 
 // Helper to clean up documents JSON string
 function getDocumentsList(docsJson: string): string {
