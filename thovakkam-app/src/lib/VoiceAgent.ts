@@ -167,38 +167,74 @@ class VoiceAgent {
         // Clean up text for speech
         const cleanText = text.replace(/\[([^\]]+)\]\([^)]+\)/g, "$1").replace(/[*#_`]/g, "");
 
-        // Create Google Translate TTS URL (splits by language, fallback to 'ta' for Tamil)
-        const langCode = this.locale.split("-")[0];
-        const url = `https://translate.google.com/translate_tts?ie=UTF-8&tl=${langCode}&client=tw-ob&q=${encodeURIComponent(cleanText)}`;
+        // Split text into chunks of under 180 characters, breaking at sentence/phrase boundaries
+        // to comply with Google Translate TTS character limit and prevent truncation/failures.
+        const chunks: string[] = [];
+        const parts = cleanText.split(/([.,!?;|()]+|\s{2,})/g);
+        
+        let currentChunk = "";
+        for (const part of parts) {
+          if ((currentChunk + part).length > 180) {
+            if (currentChunk.trim()) {
+              chunks.push(currentChunk.trim());
+            }
+            currentChunk = part;
+          } else {
+            currentChunk += part;
+          }
+        }
+        if (currentChunk.trim()) {
+          chunks.push(currentChunk.trim());
+        }
+
+        if (chunks.length === 0) {
+          resolve();
+          return;
+        }
 
         this.isSpeaking = true;
         if (this.onSpeakingStateChange) this.onSpeakingStateChange(true);
 
-        const audio = new Audio(url);
-        this.activeAudio = audio;
+        const langCode = this.locale.split("-")[0];
+        let chunkIndex = 0;
 
-        audio.onended = () => {
-          this.isSpeaking = false;
-          if (this.onSpeakingStateChange) this.onSpeakingStateChange(false);
-          this.activeAudio = null;
-          resolve();
+        const playNextChunk = () => {
+          if (chunkIndex >= chunks.length || !this.isSpeaking) {
+            this.isSpeaking = false;
+            if (this.onSpeakingStateChange) this.onSpeakingStateChange(false);
+            this.activeAudio = null;
+            resolve();
+            return;
+          }
+
+          const chunkText = chunks[chunkIndex];
+          // Use the proxy endpoint to avoid CORS and Google's referrer blocking
+          const url = `/api/voice/tts?lang=${langCode}&text=${encodeURIComponent(chunkText)}`;
+
+          const audio = new Audio(url);
+          this.activeAudio = audio;
+
+          audio.onended = () => {
+            chunkIndex++;
+            playNextChunk();
+          };
+
+          audio.onerror = (err) => {
+            console.warn("Google TTS audio chunk playback failed:", err);
+            chunkIndex++;
+            playNextChunk();
+          };
+
+          audio.play().catch((err) => {
+            console.warn("Failed to play Google TTS chunk (requires user interaction first):", err);
+            this.isSpeaking = false;
+            if (this.onSpeakingStateChange) this.onSpeakingStateChange(false);
+            this.activeAudio = null;
+            resolve();
+          });
         };
 
-        audio.onerror = (err) => {
-          console.warn("Google TTS audio playback failed:", err);
-          this.isSpeaking = false;
-          if (this.onSpeakingStateChange) this.onSpeakingStateChange(false);
-          this.activeAudio = null;
-          resolve();
-        };
-
-        audio.play().catch((err) => {
-          console.warn("Failed to play Google TTS audio (requires user interaction first):", err);
-          this.isSpeaking = false;
-          if (this.onSpeakingStateChange) this.onSpeakingStateChange(false);
-          this.activeAudio = null;
-          resolve();
-        });
+        playNextChunk();
       } catch (err) {
         console.warn("Error setting up Google TTS:", err);
         this.isSpeaking = false;
