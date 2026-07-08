@@ -19,7 +19,8 @@ import {
   VolumeX,
   Play,
   Undo2,
-  RefreshCw
+  RefreshCw,
+  Lock
 } from "lucide-react";
 
 // Types
@@ -620,6 +621,13 @@ export default function CitizenPortal() {
               <p className="text-xs text-slate-500 font-medium">
                 பாதுகாப்பானது மற்றும் எளிமையானது • 100% Secure & Accessible
               </p>
+              <a
+                href="/admin"
+                className="mt-2 text-xs text-slate-500 hover:text-indigo-400 transition font-bold flex items-center gap-1.5 underline underline-offset-4"
+              >
+                <Lock size={12} />
+                அதிகாரிகள் தளம் (Admin Portal)
+              </a>
             </div>
           </div>
         )}
