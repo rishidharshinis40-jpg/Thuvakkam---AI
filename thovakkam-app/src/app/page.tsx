@@ -20,8 +20,11 @@ import {
   Play,
   Undo2,
   RefreshCw,
-  Lock
+  Lock,
+  Mail
 } from "lucide-react";
+
+// Nodemailer OTP and direct DB auth via SQLite API
 
 // Types
 import { UserProfile, MatchResult } from "@/lib/matcher";
@@ -31,11 +34,16 @@ interface Message {
   text: string;
 }
 
+// Fallback Keys will be read dynamically from environment variables
+
 export default function CitizenPortal() {
   // Navigation & User State
   const [step, setStep] = useState<"home" | "auth" | "otp" | "dashboard" | "chat" | "recommendations" | "apply">("home");
   const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
   const [otp, setOtp] = useState("");
+  const [authError, setAuthError] = useState("");
+  const [isAuthLoading, setIsAuthLoading] = useState(false);
   const [user, setUser] = useState<any>(null);
 
   // Voice & Chat State
@@ -69,6 +77,8 @@ export default function CitizenPortal() {
 
   // Ref to automatically scroll chat to bottom
   const chatEndRef = useRef<HTMLDivElement>(null);
+
+  // EmailJS initialization removed as we now use backend SMTP
 
   // Initialize VoiceAgent dynamically to avoid SSR errors
   useEffect(() => {
@@ -109,9 +119,9 @@ export default function CitizenPortal() {
     if (step === "home") {
       speakTamil("வணக்கம்! நான் துவக்கம் AI. தமிழக அரசின் திட்டங்கள் மற்றும் உதவித்தொகைகளை எளிதாக கண்டறிய 'தொடங்கவும்' பொத்தானை அழுத்தவும்.");
     } else if (step === "auth") {
-      speakTamil("வணக்கம்! தமிழ்நாட்டின் அரசு உதவித்தொகை திட்டங்களைக் கண்டறிய உங்கள் 10 இலக்க அலைபேசி எண்ணை தட்டச்சு செய்யவும்.");
+      speakTamil("வணக்கம்! தமிழ்நாட்டின் அரசு உதவித்தொகை திட்டங்களைக் கண்டறிய உங்கள் மின்னஞ்சல் முகவரியை உள்ளிடவும்.");
     } else if (step === "otp") {
-      speakTamil("கடவுச்சொல்லை உள்ளிடவும். உங்கள் சோதனை கடவுச்சொல் ஒன்று இரண்டு மூன்று நான்கு ஆகும்.");
+      speakTamil("மின்னஞ்சலுக்கு அனுப்பப்பட்ட 6 இலக்க கடவுச்சொல்லை உள்ளிடவும்.");
     } else if (step === "dashboard") {
       speakTamil("வரவேற்கிறோம்! உங்கள் சுயவிவரத்தைக் கண்டறிய 'திட்டங்களை கண்டறி' என்ற பொத்தானை அழுத்தவும், அல்லது உங்கள் விண்ணப்ப நிலையை அறிய கீழே பார்க்கவும்.");
     }
@@ -138,7 +148,6 @@ export default function CitizenPortal() {
 
   // Dial Pad Functions for Auth
   const handleDial = (num: string) => {
-    // Play beep sound or simple TTS
     if (phone.length < 10) {
       const newPhone = phone + num;
       setPhone(newPhone);
@@ -153,66 +162,82 @@ export default function CitizenPortal() {
   };
 
   const handleOtpDial = (num: string) => {
-    if (otp.length < 4) {
+    if (otp.length < 6) {
       const newOtp = otp + num;
       setOtp(newOtp);
       speakTamil(num);
     }
   };
 
-  // Auth Actions
+  // Auth Actions - Sending OTP via SMTP Backend
   const handleSendOtp = async () => {
-    if (phone.length !== 10) {
-      speakTamil("மன்னிக்கவும். சரியான 10 இலக்க அலைபேசி எண்ணை உள்ளிடவும்.");
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      setAuthError("தவறான மின்னஞ்சல் முகவரி. தயவுசெய்து சரிபார்க்கவும்.");
+      speakTamil("தவறான மின்னஞ்சல் முகவரி. தயவுசெய்து சரிபார்க்கவும்.");
       return;
     }
 
+    setAuthError("");
+    setIsAuthLoading(true);
     setStatusText("THINKING");
+
     try {
       const res = await fetch("/api/auth/otp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "send", phone })
+        body: JSON.stringify({ action: "send", phone: email })
       });
       const data = await res.json();
       if (data.success) {
         setStep("otp");
+        speakTamil("உங்கள் மின்னஞ்சலுக்கு கடவுச்சொல் அனுப்பப்பட்டுள்ளது.");
       } else {
-        speakTamil("தவறு நிகழ்ந்துள்ளது. மீண்டும் முயலவும்.");
+        setAuthError(data.error || "பிழை ஏற்பட்டது. தயவுசெய்து மீண்டும் முயலவும்.");
+        speakTamil(data.error || "பிழை ஏற்பட்டது. தயவுசெய்து மீண்டும் முயலவும்.");
       }
-    } catch (err) {
-      console.error(err);
-      speakTamil("இணைய இணைப்பு சிக்கல்.");
+    } catch (err: any) {
+      console.error("OTP Send Error:", err);
+      setAuthError("பிழை ஏற்பட்டது. தயவுசெய்து மீண்டும் முயலவும்.");
+      speakTamil("பிழை ஏற்பட்டது. தயவுசெய்து மீண்டும் முயலவும்.");
     } finally {
+      setIsAuthLoading(false);
       setStatusText("READY");
     }
   };
 
   const handleVerifyOtp = async () => {
-    if (otp.length !== 4) {
-      speakTamil("மன்னிக்கவும். 4 இலக்க கடவுச்சொல்லை உள்ளிடவும்.");
+    if (otp.length !== 6) {
+      speakTamil("மன்னிக்கவும். 6 இலக்க கடவுச்சொல்லை உள்ளிடவும்.");
       return;
     }
 
+    setAuthError("");
+    setIsAuthLoading(true);
     setStatusText("THINKING");
+
     try {
       const res = await fetch("/api/auth/otp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "verify", phone, code: otp })
+        body: JSON.stringify({ action: "verify", phone: email, code: otp })
       });
       const data = await res.json();
       if (data.success) {
         setUser(data.user);
         setStep("dashboard");
+        speakTamil("வெற்றிகரமாக உள்நுழைந்துவிட்டீர்கள்.");
       } else {
+        setAuthError(data.error || "தவறான கடவுச்சொல். தயவுசெய்து சரிபார்த்து மீண்டும் உள்ளிடவும்.");
+        speakTamil(data.error || "தவறான கடவுச்சொல். தயவுசெய்து சரிபார்த்து மீண்டும் உள்ளிடவும்.");
         setOtp("");
-        speakTamil("தவறான கடவுச்சொல். சோதனைக்கு 1 2 3 4 ஐ உள்ளிடவும்.");
       }
     } catch (err) {
-      console.error(err);
-      speakTamil("கடவுச்சொல் சரிபார்ப்பில் தோல்வி.");
+      console.error("OTP Verify/Sync Error:", err);
+      setAuthError("பிழை ஏற்பட்டது. தயவுசெய்து மீண்டும் முயலவும்.");
+      speakTamil("பிழை ஏற்பட்டது. தயவுசெய்து மீண்டும் முயலவும்.");
     } finally {
+      setIsAuthLoading(false);
       setStatusText("READY");
     }
   };
@@ -221,25 +246,18 @@ export default function CitizenPortal() {
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (step === "auth") {
-        if (e.key >= "0" && e.key <= "9") {
-          if (phone.length < 10) {
-            setPhone(prev => prev + e.key);
-            speakTamil(e.key);
-          }
-        } else if (e.key === "Backspace") {
-          setPhone(prev => prev.slice(0, -1));
-        } else if (e.key === "Enter" && phone.length === 10) {
+        if (e.key === "Enter" && email.trim() !== "") {
           handleSendOtp();
         }
       } else if (step === "otp") {
         if (e.key >= "0" && e.key <= "9") {
-          if (otp.length < 4) {
+          if (otp.length < 6) {
             setOtp(prev => prev + e.key);
             speakTamil(e.key);
           }
         } else if (e.key === "Backspace") {
           setOtp(prev => prev.slice(0, -1));
-        } else if (e.key === "Enter" && otp.length === 4) {
+        } else if (e.key === "Enter" && otp.length === 6) {
           handleVerifyOtp();
         }
       }
@@ -249,7 +267,7 @@ export default function CitizenPortal() {
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [step, phone, otp]);
+  }, [step, email, otp]);
 
   // START NEW CONVERSATION
   const startConversation = () => {
@@ -273,12 +291,10 @@ export default function CitizenPortal() {
   const handleUserInput = async (transcript: string) => {
     if (!transcript.trim()) return;
 
-    // Add message to chat log
     setMessages(prev => [...prev, { sender: "user", text: transcript }]);
     setStatusText("THINKING");
 
     try {
-      // Send transcript and state to API
       const state = {
         currentQuestionId,
         profile,
@@ -299,13 +315,11 @@ export default function CitizenPortal() {
         return;
       }
 
-      // Recognize navigation command first
       if (data.navigationCommand && data.navigationCommand !== "none") {
         handleNavigation(data.navigationCommand);
         return;
       }
 
-      // Update state
       setProfile(data.profile);
       setCurrentQuestionId(data.nextQuestionId);
       setIsComplete(data.isComplete);
@@ -315,7 +329,6 @@ export default function CitizenPortal() {
         speakTamil(data.tamilResponse);
       }
 
-      // If complete, fetch matches!
       if (data.isComplete) {
         fetchSchemeMatches(data.profile);
       }
@@ -328,7 +341,6 @@ export default function CitizenPortal() {
     }
   };
 
-  // Listen wrapper
   const handleMicTap = async () => {
     if (isListening) {
       voiceAgent?.stopListening();
@@ -347,13 +359,11 @@ export default function CitizenPortal() {
     }
   };
 
-  // Navigation commands recognized globally
   const handleNavigation = (command: string) => {
     speakTamil(`கட்டளை பெறப்பட்டது: ${command}`);
     if (command === "menu") {
       setStep("dashboard");
     } else if (command === "previous") {
-      // Simple revert
       startConversation();
     } else if (command === "next" && isComplete) {
       setStep("recommendations");
@@ -363,23 +373,18 @@ export default function CitizenPortal() {
     }
   };
 
-  // Matching function
   const fetchSchemeMatches = async (completedProfile: UserProfile) => {
     setStatusText("THINKING");
     try {
-      // We will match in database
-      // First get all active schemes from database
       const resSchemes = await fetch("/api/admin/schemes");
       const schemesData = await resSchemes.json();
 
       if (schemesData.success) {
         const schemes = schemesData.schemes;
-        // Call the client side ranker
         const { rankSchemes } = require("@/lib/matcher");
         const ranked = rankSchemes(completedProfile, schemes);
         setMatchedSchemes(ranked);
 
-        // Inform user they have matches
         const count = ranked.length;
         const msg = count > 0
           ? `உங்களுக்குப் பொருத்தமான ${count} திட்டங்களைக் கண்டறிந்துள்ளேன்! அவற்றைப் பார்க்க 'திட்டங்களை காட்டு' என்று கூறுங்கள் அல்லது பொத்தானை அழுத்தவும்.`
@@ -395,14 +400,12 @@ export default function CitizenPortal() {
     }
   };
 
-  // View scheme details
   const viewSchemeDetails = async (match: MatchResult) => {
     setSelectedScheme(match);
     setSchemeExplanation("");
     setFollowUpAnswer("");
     setStep("recommendations");
 
-    // Call explain API
     try {
       const res = await fetch("/api/voice/explain", {
         method: "POST",
@@ -419,7 +422,6 @@ export default function CitizenPortal() {
     }
   };
 
-  // Scheme specific follow-up questions
   const askFollowUp = async (questionText: string) => {
     if (!questionText.trim() || !selectedScheme) return;
 
@@ -468,14 +470,12 @@ export default function CitizenPortal() {
     }
   };
 
-  // Document photo upload simulation
   const handlePhotoCapture = (docName: string) => {
     setUploadedDocs(prev => ({ ...prev, [docName]: true }));
     speakTamil(`${docName} புகைப்படம் எடுக்கப்பட்டது.`);
   };
 
   const handleApplySubmit = async () => {
-    // Verify all docs uploaded
     const requiredDocsList = JSON.parse(selectedScheme.scheme?.requiredDocuments || "[]") as string[];
     const allUploaded = requiredDocsList.every(d => uploadedDocs[d]);
 
@@ -502,7 +502,7 @@ export default function CitizenPortal() {
         setAppNumber(`APP-${randomNum}`);
         setApplySuccess(true);
         speakTamil("வாழ்த்துகள்! உங்கள் விண்ணப்பம் வெற்றிகரமாக சமர்ப்பிக்கப்பட்டது. விரைவில் அதிகாரிகள் தொடர்பு கொள்வார்கள்.");
-        fetchUserApplications(); // Refresh history
+        fetchUserApplications();
       } else {
         speakTamil(data.message || "சமர்ப்பிப்பதில் தோல்வி.");
       }
@@ -516,7 +516,6 @@ export default function CitizenPortal() {
 
   return (
     <div className="flex flex-col min-h-screen bg-slate-900 text-slate-100 font-sans">
-
       {/* Top Header */}
       <header className="flex items-center justify-between px-6 py-4 bg-slate-800/80 border-b border-slate-700 backdrop-blur sticky top-0 z-30">
         <div className="flex items-center gap-3">
@@ -532,8 +531,6 @@ export default function CitizenPortal() {
         </div>
 
         <div className="flex items-center gap-3">
-          {/* Spoken Feedback Toggle */}
-
           <button
             onClick={() => { if (lastSpokenText) speakTamil(lastSpokenText); }}
             disabled={!lastSpokenText}
@@ -544,14 +541,15 @@ export default function CitizenPortal() {
             <Play size={20} />
           </button>
 
-          {/* User Signout */}
           {user && (
             <button
               onClick={() => {
                 setUser(null);
                 setStep("auth");
+                setEmail("");
                 setPhone("");
                 setOtp("");
+                setAuthError("");
               }}
               className="flex items-center gap-2 px-4 py-2 bg-rose-600/20 border border-rose-500/30 text-rose-300 rounded-lg hover:bg-rose-600/30 transition text-sm font-semibold"
               aria-label="வெளியேறு (Logout)"
@@ -566,10 +564,9 @@ export default function CitizenPortal() {
       {/* Main Container */}
       <main className="flex flex-col flex-1 items-center justify-center p-4 max-w-xl mx-auto w-full">
 
-        {/* -------------------- STEP 0: HOME PAGE -------------------- */}
+        {/* STEP 0: HOME PAGE */}
         {step === "home" && (
           <div className="w-full flex flex-col gap-8 text-center animate-fade-in py-6">
-            {/* Hero Section */}
             <div className="flex flex-col items-center gap-4">
               <div className="px-4 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-bold uppercase tracking-wider animate-pulse">
                 தமிழக அரசு உதவித்தொகை திட்டங்கள்
@@ -582,7 +579,6 @@ export default function CitizenPortal() {
               </p>
             </div>
 
-            {/* Feature Cards Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 w-full mt-2">
               <div className="flex flex-col items-center p-5 rounded-2xl bg-slate-800/80 border border-slate-700/60 shadow-lg hover:border-blue-500/30 transition group">
                 <div className="w-12 h-12 rounded-xl bg-blue-600/10 border border-blue-500/20 flex items-center justify-center text-blue-400 group-hover:scale-110 transition mb-3">
@@ -609,10 +605,12 @@ export default function CitizenPortal() {
               </div>
             </div>
 
-            {/* CTA Action */}
             <div className="flex flex-col items-center gap-4 mt-4">
               <button
-                onClick={() => setStep("auth")}
+                onClick={() => {
+                  speakTamil("வணக்கம்! தமிழ்நாட்டின் அரசு உதவித்தொகை திட்டங்களைக் கண்டறிய உங்கள் மின்னஞ்சல் முகவரியை உள்ளிடவும்.");
+                  setStep("auth");
+                }}
                 className="w-full max-w-xs py-4 rounded-xl bg-gradient-to-r from-blue-600 to-emerald-600 hover:from-blue-500 hover:to-emerald-500 text-white font-bold text-lg shadow-lg shadow-emerald-600/20 hover:shadow-emerald-500/30 active:scale-98 transition flex items-center justify-center gap-3"
               >
                 <Play size={20} className="fill-white" />
@@ -632,12 +630,11 @@ export default function CitizenPortal() {
           </div>
         )}
 
-        {/* -------------------- STEP 1: AUTH PHONE -------------------- */}
+        {/* STEP 1: AUTH EMAIL */}
         {step === "auth" && (
           <div className="w-full flex flex-col gap-6 text-center animate-fade-in py-6">
-            {/* Back to Homepage */}
-            <button 
-              onClick={() => setStep("home")}
+            <button
+              onClick={() => { setStep("home"); setAuthError(""); }}
               className="flex items-center gap-2 text-slate-400 hover:text-slate-200 font-semibold mb-2 self-start text-sm transition"
             >
               <ArrowLeft size={16} />
@@ -646,61 +643,48 @@ export default function CitizenPortal() {
 
             <div className="flex flex-col items-center">
               <div className="w-16 h-16 rounded-full bg-blue-600/10 border border-blue-500/20 flex items-center justify-center text-blue-400 mb-4 shadow-inner">
-                <Phone size={32} />
+                <Mail size={32} />
               </div>
-              <h2 className="text-2xl font-bold">அலைபேசி எண்</h2>
-              <p className="text-slate-400 mt-2 text-sm">உள்நுழைய 10 இலக்க அலைபேசி எண்ணை உள்ளிடவும்.</p>
+              <h2 className="text-2xl font-bold">மின்னஞ்சல் முகவரி</h2>
+              <p className="text-slate-400 mt-2 text-sm">உள்நுழைய உங்கள் மின்னஞ்சல் முகவரியை உள்ளிடவும்.</p>
             </div>
 
-            {/* Display digits */}
-            <div className="w-full bg-slate-800 border border-slate-700 py-4 px-6 rounded-xl text-3xl font-mono tracking-widest text-blue-400 h-16 flex items-center justify-center shadow-inner">
-              {phone || "அலைபேசி எண்"}
+            <div className="w-full flex flex-col text-left gap-1.5 max-w-sm mx-auto">
+              <label className="text-xs text-slate-400 font-bold uppercase tracking-wider">மின்னஞ்சல் (Email Address)</label>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="rishidharshinis40@gmail.com"
+                className="w-full bg-slate-800 border border-slate-700 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 py-3.5 px-4 rounded-xl text-base text-slate-100 shadow-inner outline-none transition"
+              />
             </div>
 
-            {/* Dial pad - Accessible large touch targets */}
-            <div className="grid grid-cols-3 gap-3 max-w-sm mx-auto w-full">
-              {["1", "2", "3", "4", "5", "6", "7", "8", "9"].map((num) => (
-                <button
-                  key={num}
-                  onClick={() => handleDial(num)}
-                  className="h-16 rounded-xl bg-slate-800 hover:bg-slate-700 active:scale-95 transition font-bold text-xl flex items-center justify-center border border-slate-700/50 shadow"
-                >
-                  {num}
-                </button>
-              ))}
-              <button
-                onClick={() => setPhone("")}
-                className="h-16 rounded-xl bg-slate-800/50 text-rose-400 hover:bg-rose-600/20 transition text-sm font-semibold flex items-center justify-center border border-slate-700/50"
-              >
-                அழி
-              </button>
-              <button
-                onClick={() => handleDial("0")}
-                className="h-16 rounded-xl bg-slate-800 hover:bg-slate-700 active:scale-95 transition font-bold text-xl flex items-center justify-center border border-slate-700/50 shadow"
-              >
-                0
-              </button>
-              <button
-                onClick={handleDialBackspace}
-                className="h-16 rounded-xl bg-slate-800/50 text-slate-300 hover:bg-slate-700 transition flex items-center justify-center border border-slate-700/50"
-                aria-label="பின்செல்லவும் (Backspace)"
-              >
-                <Undo2 size={20} />
-              </button>
-            </div>
+            {authError && (
+              <div className="mx-auto flex items-center gap-2 px-4 py-2 bg-rose-500/10 border border-rose-500/30 text-rose-400 rounded-lg text-sm font-semibold max-w-sm text-left animate-fade-in">
+                <AlertCircle size={16} className="shrink-0" />
+                <span>{authError}</span>
+              </div>
+            )}
 
-            {/* Submit Button */}
             <button
               onClick={handleSendOtp}
-              disabled={phone.length !== 10}
-              className="mt-4 w-full py-4 rounded-xl bg-blue-600 hover:bg-blue-500 disabled:opacity-40 disabled:hover:bg-blue-600 text-white font-bold text-lg shadow-lg shadow-blue-500/20 active:scale-98 transition flex items-center justify-center gap-2"
+              disabled={isAuthLoading || !email}
+              className="mt-2 w-full max-w-sm mx-auto py-4 rounded-xl bg-blue-600 hover:bg-blue-500 disabled:opacity-40 disabled:hover:bg-blue-600 text-white font-bold text-lg shadow-lg shadow-blue-500/20 active:scale-98 transition flex items-center justify-center gap-2"
             >
-              தொடரவும் (Next)
+              {isAuthLoading ? (
+                <>
+                  <RefreshCw className="animate-spin" size={20} />
+                  அனுப்பப்படுகிறது...
+                </>
+              ) : (
+                "கடவுச்சொல் அனுப்பு (Send OTP)"
+              )}
             </button>
           </div>
         )}
 
-        {/* -------------------- STEP 2: OTP VERIFY -------------------- */}
+        {/* STEP 2: OTP VERIFY */}
         {step === "otp" && (
           <div className="w-full flex flex-col gap-6 text-center animate-fade-in py-6">
             <div className="flex flex-col items-center">
@@ -708,17 +692,15 @@ export default function CitizenPortal() {
                 <CheckCircle size={32} />
               </div>
               <h2 className="text-2xl font-bold">கடவுச்சொல்</h2>
-              <p className="text-slate-400 mt-2 text-sm">4 இலக்க கடவுச்சொல்லை உள்ளிடவும்.<br />(சோதனை எண்: <span className="font-bold text-blue-400">1234</span>)</p>
+              <p className="text-slate-400 mt-2 text-sm">மின்னஞ்சலுக்கு அனுப்பப்பட்ட 6 இலக்க கடவுச்சொல்லை உள்ளிடவும்.</p>
             </div>
 
-            {/* Display OTP */}
             <div className="w-full bg-slate-800 border border-slate-700 py-4 px-6 rounded-xl text-3xl font-mono tracking-[1rem] text-emerald-400 h-16 flex items-center justify-center shadow-inner">
-              {otp ? otp.padEnd(4, "•").split("").map((c, i) => (
+              {otp ? otp.padEnd(6, "•").split("").map((c, i) => (
                 <span key={i} className={otp[i] ? "text-emerald-400" : "text-slate-600"}>{c}</span>
-              )) : "••••"}
+              )) : "••••••"}
             </div>
 
-            {/* Dial pad - Accessible large touch targets */}
             <div className="grid grid-cols-3 gap-3 max-w-sm mx-auto w-full">
               {["1", "2", "3", "4", "5", "6", "7", "8", "9"].map((num) => (
                 <button
@@ -749,34 +731,46 @@ export default function CitizenPortal() {
               </button>
             </div>
 
-            {/* Verify Button */}
+            {authError && (
+              <div className="mx-auto flex items-center gap-2 px-4 py-2 bg-rose-500/10 border border-rose-500/30 text-rose-400 rounded-lg text-sm font-semibold max-w-sm text-left animate-fade-in">
+                <AlertCircle size={16} className="shrink-0" />
+                <span>{authError}</span>
+              </div>
+            )}
+
             <button
               onClick={handleVerifyOtp}
-              disabled={otp.length !== 4}
+              disabled={isAuthLoading || otp.length !== 6}
               className="mt-4 w-full py-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 disabled:opacity-40 disabled:hover:bg-emerald-600 text-white font-bold text-lg shadow-lg shadow-emerald-500/20 active:scale-98 transition flex items-center justify-center gap-2"
             >
-              சரிபார்க்கவும் (Verify)
+              {isAuthLoading ? (
+                <>
+                  <RefreshCw className="animate-spin" size={20} />
+                  சரிபார்க்கப்படுகிறது...
+                </>
+              ) : (
+                "சரிபார்க்கவும் (Verify)"
+              )}
             </button>
 
             <button
-              onClick={() => { setStep("auth"); setPhone(""); setOtp(""); }}
+              onClick={() => { setStep("auth"); setEmail(""); setOtp(""); setAuthError(""); }}
               className="text-sm text-slate-400 hover:text-slate-200 transition font-semibold"
             >
-              எண்ணை மாற்றவும்
+              மின்னஞ்சலை மாற்றவும்
             </button>
           </div>
         )}
 
-        {/* -------------------- STEP 3: CITIZEN DASHBOARD -------------------- */}
+        {/* STEP 3: CITIZEN DASHBOARD */}
         {step === "dashboard" && (
           <div className="w-full flex flex-col gap-6 py-4 animate-fade-in">
-            {/* User welcome card */}
             <div className="bg-gradient-to-br from-blue-900/60 to-indigo-950/60 border border-blue-500/20 rounded-2xl p-6 shadow-xl relative overflow-hidden">
               <div className="absolute right-0 bottom-0 opacity-10 pointer-events-none">
                 <Mic size={150} />
               </div>
               <h2 className="text-xl font-bold mb-1">வரவேற்கிறோம், {user?.name || "அன்பர்"}!</h2>
-              <p className="text-xs text-blue-300 font-medium">அலைபேசி: {user?.phone}</p>
+              <p className="text-xs text-blue-300 font-medium">மின்னஞ்சல்: {user?.phone}</p>
 
               <button
                 onClick={startConversation}
@@ -787,7 +781,6 @@ export default function CitizenPortal() {
               </button>
             </div>
 
-            {/* Application history status */}
             <div className="flex flex-col gap-4">
               <h3 className="text-lg font-bold flex items-center gap-2 text-slate-300">
                 <FileText size={20} className="text-blue-400" />
@@ -836,10 +829,9 @@ export default function CitizenPortal() {
           </div>
         )}
 
-        {/* -------------------- STEP 4: ADAPTIVE VOICE CHAT -------------------- */}
+        {/* STEP 4: ADAPTIVE VOICE CHAT */}
         {step === "chat" && (
           <div className="w-full flex flex-col flex-1 h-[70vh] py-2 animate-fade-in">
-            {/* Back button */}
             <button
               onClick={() => { voiceAgent?.cancelAll(); setStep("dashboard"); }}
               className="flex items-center gap-2 text-slate-400 hover:text-slate-200 font-semibold mb-3 self-start text-sm"
@@ -848,7 +840,6 @@ export default function CitizenPortal() {
               முதன்மை மெனு (Main Menu)
             </button>
 
-            {/* Speech Chat Window */}
             <div className="flex-1 overflow-y-auto bg-slate-950/40 border border-slate-800 rounded-2xl p-4 flex flex-col gap-4 max-h-[40vh] sm:max-h-[50vh] shadow-inner mb-4">
               {messages.map((m, idx) => (
                 <div
@@ -866,7 +857,6 @@ export default function CitizenPortal() {
               <div ref={chatEndRef} />
             </div>
 
-            {/* Conversation Progress Tracker */}
             <div className="grid grid-cols-5 gap-2 px-2 py-1 mb-4 border border-slate-800/40 rounded-xl bg-slate-800/10 text-[9px] uppercase font-bold text-center text-slate-500">
               <span className={profile.name ? "text-emerald-400" : ""}>பெயர்</span>
               <span className={profile.age ? "text-emerald-400" : ""}>வயது</span>
@@ -875,12 +865,8 @@ export default function CitizenPortal() {
               <span className={profile.annualIncome ? "text-emerald-400" : ""}>வருமானம்</span>
             </div>
 
-            {/* Mic / Action Console */}
             <div className="flex flex-col items-center gap-4 mt-auto">
-
-              {/* Massive Mic Button */}
               <div className="relative">
-                {/* Visual pulse indicators for states */}
                 {isListening && (
                   <span className="absolute -inset-4 rounded-full bg-emerald-500/20 animate-ping pointer-events-none" />
                 )}
@@ -910,7 +896,6 @@ export default function CitizenPortal() {
                 </button>
               </div>
 
-              {/* Status helper text */}
               <p className={`text-xs font-bold uppercase tracking-wider ${isListening ? "text-emerald-400 animate-pulse" : isSpeaking ? "text-blue-400" : "text-slate-400"
                 }`}>
                 {isListening
@@ -922,7 +907,6 @@ export default function CitizenPortal() {
                       : "பேசுவதற்கு மைக் அழுத்தவும்"}
               </p>
 
-              {/* Developer Input Fallback (for testing speech locally without actual mic) */}
               <div className="w-full flex gap-2 border-t border-slate-800 pt-4 mt-2">
                 <input
                   type="text"
@@ -948,7 +932,6 @@ export default function CitizenPortal() {
                 </button>
               </div>
 
-              {/* Action buttons (Complete state) */}
               {isComplete && (
                 <button
                   onClick={() => setStep("recommendations")}
@@ -958,15 +941,13 @@ export default function CitizenPortal() {
                   பொருந்தும் திட்டங்களைக் காட்டு (Show Schemes)
                 </button>
               )}
-
             </div>
           </div>
         )}
 
-        {/* -------------------- STEP 5: RECOMMENDATIONS -------------------- */}
+        {/* STEP 5: RECOMMENDATIONS */}
         {step === "recommendations" && (
           <div className="w-full flex flex-col gap-6 py-4 animate-fade-in">
-            {/* Top Navigation */}
             <div className="flex items-center justify-between border-b border-slate-800 pb-3">
               <button
                 onClick={() => { voiceAgent?.cancelAll(); setStep("chat"); }}
@@ -978,7 +959,6 @@ export default function CitizenPortal() {
               <h2 className="font-bold text-slate-300">உங்களுக்கான திட்டங்கள்</h2>
             </div>
 
-            {/* Selected Scheme Detail View */}
             {selectedScheme ? (
               <div className="flex flex-col gap-4 bg-slate-800 border border-slate-700 rounded-2xl p-5 shadow-xl animate-scale-in">
                 <button
@@ -990,7 +970,6 @@ export default function CitizenPortal() {
 
                 <h3 className="text-xl font-bold leading-tight">{selectedScheme.schemeName}</h3>
 
-                {/* Explanation text */}
                 <div className="bg-slate-950/40 border border-slate-700/50 rounded-xl p-4 text-sm leading-relaxed text-slate-200 flex items-start gap-3">
                   <span className="flex-1">{schemeExplanation || "விளக்கம் பெறப்படுகிறது..."}</span>
 
@@ -1006,7 +985,6 @@ export default function CitizenPortal() {
                   )}
                 </div>
 
-                {/* Follow up question section */}
                 <div className="border-t border-slate-700 pt-4 flex flex-col gap-3">
                   <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wide">திட்டம் பற்றி கேள்வி கேளுங்கள் (Ask Follow-up)</h4>
 
@@ -1053,7 +1031,6 @@ export default function CitizenPortal() {
                   )}
                 </div>
 
-                {/* Apply wizard trigger */}
                 <button
                   onClick={() => {
                     voiceAgent?.cancelAll();
@@ -1068,7 +1045,6 @@ export default function CitizenPortal() {
                 </button>
               </div>
             ) : (
-              /* All matched schemes listing */
               <div className="flex flex-col gap-4">
                 {matchedSchemes.length === 0 ? (
                   <div className="bg-slate-800/40 border border-slate-700 rounded-2xl p-8 text-center text-slate-500 font-bold">
@@ -1089,10 +1065,9 @@ export default function CitizenPortal() {
                             பொருத்தம்: {match.score}%
                           </span>
 
-                          {/* Speak this card's info */}
                           <button
                             onClick={(e) => {
-                              e.stopPropagation(); // Card click aagama irukka
+                              e.stopPropagation();
                               const reasonText = match.reasons.length > 0 ? match.reasons[0] : "";
                               speakTamil(`${match.schemeName}. ${reasonText}`);
                             }}
@@ -1105,7 +1080,6 @@ export default function CitizenPortal() {
                         </div>
                       </div>
 
-                      {/* Short reasons snippet */}
                       <p className="text-xs text-slate-400 line-clamp-2">
                         {match.reasons.length > 0 ? match.reasons[0] : "விபரங்களைக் காண தட்டவும்."}
                       </p>
@@ -1122,10 +1096,9 @@ export default function CitizenPortal() {
           </div>
         )}
 
-        {/* -------------------- STEP 6: APPLY WIZARD -------------------- */}
+        {/* STEP 6: APPLY WIZARD */}
         {step === "apply" && selectedScheme && (
           <div className="w-full flex flex-col gap-6 py-4 animate-fade-in">
-            {/* Top Navigation */}
             <div className="flex items-center justify-between border-b border-slate-800 pb-3">
               <button
                 onClick={() => { voiceAgent?.cancelAll(); setStep("recommendations"); }}
@@ -1138,7 +1111,6 @@ export default function CitizenPortal() {
             </div>
 
             {applySuccess ? (
-              /* Success panel */
               <div className="bg-slate-800 border border-slate-700 rounded-2xl p-6 text-center shadow-xl animate-scale-in flex flex-col items-center gap-4">
                 <div className="w-20 h-20 bg-emerald-600/10 border border-emerald-500/30 rounded-full flex items-center justify-center text-emerald-400 mb-2">
                   <CheckCircle size={48} className="animate-bounce" />
@@ -1160,7 +1132,6 @@ export default function CitizenPortal() {
                 </button>
               </div>
             ) : (
-              /* Step-by-step document uploader */
               <div className="flex flex-col gap-5 bg-slate-800 border border-slate-700 rounded-2xl p-6 shadow-xl">
                 <div>
                   <h3 className="font-bold text-base line-clamp-1">{selectedScheme.schemeName}</h3>
@@ -1181,7 +1152,6 @@ export default function CitizenPortal() {
                         <span className="font-bold text-sm text-slate-200">{doc}</span>
                       </div>
 
-                      {/* Mock camera capture button (accessible large target) */}
                       <button
                         onClick={() => handlePhotoCapture(doc)}
                         className={`h-12 px-4 rounded-lg flex items-center gap-1.5 text-xs font-bold transition border ${uploadedDocs[doc]
