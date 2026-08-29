@@ -75,6 +75,123 @@ export default function CitizenPortal() {
   const [userApplications, setUserApplications] = useState<any[]>([]);
   const [appNumber, setAppNumber] = useState("");
 
+  // Camera & Capture State
+  const [capturedPhotos, setCapturedPhotos] = useState<Record<string, string>>({});
+  const [isCameraOpen, setIsCameraOpen] = useState(false);
+  const [activeCaptureDoc, setActiveCaptureDoc] = useState<string | null>(null);
+  const [cameraStream, setCameraStream] = useState<MediaStream | null>(null);
+  const [cameraError, setCameraError] = useState<string | null>(null);
+  const [capturedPreview, setCapturedPreview] = useState<string | null>(null);
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+
+  // Manage camera media stream
+  useEffect(() => {
+    let activeStream: MediaStream | null = null;
+    if (isCameraOpen && activeCaptureDoc) {
+      setCameraError(null);
+      setCapturedPreview(null);
+      
+      const startCamera = async () => {
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
+          activeStream = stream;
+          setCameraStream(stream);
+          if (videoRef.current) {
+            videoRef.current.srcObject = stream;
+          }
+        } catch (err) {
+          console.warn("Back camera environment mode failed, falling back to default camera:", err);
+          try {
+            const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+            activeStream = stream;
+            setCameraStream(stream);
+            if (videoRef.current) {
+              videoRef.current.srcObject = stream;
+            }
+          } catch (fallbackErr) {
+            console.error("Camera access error:", fallbackErr);
+            setCameraError("கேமரா அனுமதி மறுக்கப்பட்டுள்ளது. தயவுசெய்து உங்கள் அமைப்புகளில் கேமரா அனுமதியை இயக்கவும். (Camera access denied. Please enable camera permission in settings.)");
+          }
+        }
+      };
+
+      startCamera();
+    }
+
+    return () => {
+      if (activeStream) {
+        activeStream.getTracks().forEach(track => track.stop());
+      }
+    };
+  }, [isCameraOpen, activeCaptureDoc]);
+
+  const stopCameraStream = () => {
+    if (cameraStream) {
+      cameraStream.getTracks().forEach(track => track.stop());
+      setCameraStream(null);
+    }
+  };
+
+  const handleCapture = () => {
+    if (videoRef.current) {
+      const video = videoRef.current;
+      const canvas = document.createElement("canvas");
+      canvas.width = video.videoWidth || 640;
+      canvas.height = video.videoHeight || 480;
+      const ctx = canvas.getContext("2d");
+      if (ctx) {
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        const dataUrl = canvas.toDataURL("image/jpeg", 0.85);
+        setCapturedPreview(dataUrl);
+        stopCameraStream();
+      }
+    }
+  };
+
+  const handleRetake = async () => {
+    setCapturedPreview(null);
+    setCameraError(null);
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
+      setCameraStream(stream);
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+      }
+    } catch (err) {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        setCameraStream(stream);
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream;
+        }
+      } catch (fallbackErr) {
+        console.error("Camera access error on retake:", fallbackErr);
+        setCameraError("கேமரா அனுமதி மறுக்கப்பட்டுள்ளது. (Camera access denied.)");
+      }
+    }
+  };
+
+  const handleSavePhoto = () => {
+    if (activeCaptureDoc && capturedPreview) {
+      setCapturedPhotos(prev => ({ ...prev, [activeCaptureDoc]: capturedPreview }));
+      setUploadedDocs(prev => ({ ...prev, [activeCaptureDoc]: true }));
+      speakTamil(`${activeCaptureDoc} புகைப்படம் எடுக்கப்பட்டது.`);
+      
+      stopCameraStream();
+      setIsCameraOpen(false);
+      setActiveCaptureDoc(null);
+      setCapturedPreview(null);
+    }
+  };
+
+  const handleCloseCamera = () => {
+    stopCameraStream();
+    setIsCameraOpen(false);
+    setActiveCaptureDoc(null);
+    setCapturedPreview(null);
+    setCameraError(null);
+  };
+
   // Ref to automatically scroll chat to bottom
   const chatEndRef = useRef<HTMLDivElement>(null);
 
@@ -471,8 +588,8 @@ export default function CitizenPortal() {
   };
 
   const handlePhotoCapture = (docName: string) => {
-    setUploadedDocs(prev => ({ ...prev, [docName]: true }));
-    speakTamil(`${docName} புகைப்படம் எடுக்கப்பட்டது.`);
+    setActiveCaptureDoc(docName);
+    setIsCameraOpen(true);
   };
 
   const handleApplySubmit = async () => {
@@ -486,13 +603,15 @@ export default function CitizenPortal() {
 
     setStatusText("THINKING");
     try {
+      const documentsPayload = requiredDocsList.map(d => capturedPhotos[d] || `/mock_camera/${d.replace(/\s+/g, '_')}.jpg`);
+
       const res = await fetch("/api/applications", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           userId: user.id,
           schemeId: selectedScheme.schemeId,
-          documents: Object.keys(uploadedDocs).map(d => `/mock_camera/${d.replace(/\s+/g, '_')}.jpg`),
+          documents: documentsPayload,
           profileData: profile
         })
       });
@@ -1219,7 +1338,14 @@ export default function CitizenPortal() {
                           }`}>
                           {uploadedDocs[doc] ? <Check size={14} /> : idx + 1}
                         </div>
-                        <span className="font-bold text-sm text-slate-200">{doc}</span>
+                        <div className="flex flex-col">
+                          <span className="font-bold text-sm text-slate-200">{doc}</span>
+                          {capturedPhotos[doc] && (
+                            <span className="text-[10px] text-emerald-400 flex items-center gap-1 font-semibold mt-0.5">
+                              ✓ படம் இணைக்கப்பட்டுள்ளது (Photo attached)
+                            </span>
+                          )}
+                        </div>
                       </div>
 
                       <button
@@ -1256,6 +1382,82 @@ export default function CitizenPortal() {
         )}
 
       </main>
+
+      {/* CAMERA CAPTURE MODAL OVERLAY */}
+      {isCameraOpen && activeCaptureDoc && (
+        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in">
+          <div className="w-full max-w-md bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-2xl flex flex-col gap-4 relative animate-scale-in">
+            <button
+              type="button"
+              onClick={handleCloseCamera}
+              className="absolute right-4 top-4 p-2 bg-slate-800 hover:bg-slate-750 rounded-full text-slate-400 transition"
+              aria-label="மூடுக (Close camera)"
+            >
+              <Check size={16} className="rotate-45" />
+            </button>
+
+            <div>
+              <h3 className="text-base font-bold text-slate-200">ஆவணம் புகைப்படம் எடுத்தல்</h3>
+              <p className="text-xs text-slate-400 mt-0.5">{activeCaptureDoc}</p>
+            </div>
+
+            <div className="relative w-full aspect-video rounded-xl bg-slate-950 border border-slate-850 overflow-hidden flex items-center justify-center shadow-inner">
+              {cameraError ? (
+                <div className="text-center p-4 flex flex-col items-center gap-2">
+                  <div className="w-10 h-10 rounded-full bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-rose-400">
+                    <AlertCircle size={20} />
+                  </div>
+                  <p className="text-xs font-semibold text-rose-400 leading-relaxed max-w-[280px]">{cameraError}</p>
+                </div>
+              ) : capturedPreview ? (
+                <img
+                  src={capturedPreview}
+                  alt="Captured Document Preview"
+                  className="w-full h-full object-contain"
+                />
+              ) : (
+                <video
+                  ref={videoRef}
+                  autoPlay
+                  playsInline
+                  className="w-full h-full object-cover"
+                />
+              )}
+            </div>
+
+            <div className="flex gap-3">
+              {capturedPreview ? (
+                <>
+                  <button
+                    type="button"
+                    onClick={handleRetake}
+                    className="flex-1 py-3 bg-slate-800 hover:bg-slate-750 text-slate-200 font-bold rounded-xl active:scale-98 transition text-xs uppercase tracking-wider border border-slate-700"
+                  >
+                    மீண்டும் எடுக்க (Retake)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleSavePhoto}
+                    className="flex-1 py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl active:scale-98 transition text-xs uppercase tracking-wider"
+                  >
+                    சேமிக்கவும் (Save)
+                  </button>
+                </>
+              ) : (
+                <button
+                  type="button"
+                  onClick={handleCapture}
+                  disabled={!!cameraError}
+                  className="w-full py-3 bg-blue-600 hover:bg-blue-500 disabled:opacity-40 disabled:hover:bg-blue-600 text-white font-bold rounded-xl active:scale-98 transition text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg shadow-blue-500/10"
+                >
+                  <Camera size={16} />
+                  புகைப்படம் எடு (Capture Photo)
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Floating Bottom mic button on non-chat active steps */}
       {step !== "chat" && step !== "auth" && step !== "otp" && (
