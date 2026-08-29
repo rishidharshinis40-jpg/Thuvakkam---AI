@@ -74,7 +74,7 @@ export default function AdminDashboard() {
     category: "welfare",
     department: "",
     benefits: "",
-    requiredDocuments: "",
+    requiredDocuments: [] as string[],
     applicationProcedure: "",
     lastDate: "",
     officialLink: "",
@@ -87,6 +87,7 @@ export default function AdminDashboard() {
     disabilityStatus: false,
     isSeniorCitizen: false
   });
+  const [formError, setFormError] = useState("");
 
   // Load stats and tables on login or tab change
   useEffect(() => {
@@ -196,11 +197,54 @@ export default function AdminDashboard() {
         isSeniorCitizen: schemeForm.isSeniorCitizen || undefined
       };
 
-      // Split documents list by comma
-      const requiredDocuments = schemeForm.requiredDocuments
-        .split(",")
+      // Clear previous error
+      setFormError("");
+
+      const requiredDocs = schemeForm.requiredDocuments
         .map(d => d.trim())
-        .filter(d => d.length > 0);
+        .filter(Boolean);
+
+      if (requiredDocs.length === 0) {
+        setFormError("குறைந்தது ஒரு ஆவணமாவது தேவை (At least one required document is required)");
+        return;
+      }
+
+      // Check for empty names in the current entries
+      const hasEmpty = schemeForm.requiredDocuments.some(d => !d.trim());
+      if (hasEmpty) {
+        setFormError("ஆவணப் பெயர் காலியாக இருக்க முடியாது (Document name cannot be empty)");
+        return;
+      }
+
+      // Check for duplicate document names
+      const uniqueDocs = Array.from(new Set(requiredDocs));
+      if (uniqueDocs.length !== requiredDocs.length) {
+        setFormError("நகல் ஆவணப் பெயர்கள் இருக்கக் கூடாது (Duplicate document names are not allowed)");
+        return;
+      }
+
+      if (schemeForm.officialLink) {
+        const trimmedLink = schemeForm.officialLink.trim();
+        try {
+          const url = new URL(trimmedLink);
+          if (url.protocol !== "https:" && url.protocol !== "http:") {
+            setFormError("அதிகாரப்பூர்வ முகவரி HTTP அல்லது HTTPS ஆக இருக்க வேண்டும் (Official link protocol must be HTTP or HTTPS)");
+            return;
+          }
+          const lowerLink = trimmedLink.toLowerCase();
+          if (
+            lowerLink.includes("javascript:") ||
+            lowerLink.includes("data:") ||
+            lowerLink.includes("vbscript:")
+          ) {
+            setFormError("ஆபத்தான இணைப்பு கண்டறியப்பட்டது (Unsafe link detected)");
+            return;
+          }
+        } catch (e) {
+          setFormError("சரியான இணைய முகவரியை உள்ளிடவும் (Please enter a valid URL)");
+          return;
+        }
+      }
 
       const payload = {
         id: currentScheme?.id,
@@ -212,7 +256,7 @@ export default function AdminDashboard() {
         applicationProcedure: schemeForm.applicationProcedure,
         lastDate: schemeForm.lastDate || null,
         officialLink: schemeForm.officialLink || null,
-        requiredDocuments: JSON.stringify(requiredDocuments),
+        requiredDocuments: JSON.stringify(requiredDocs),
         eligibilityRules: JSON.stringify(rules)
       };
 
@@ -226,10 +270,14 @@ export default function AdminDashboard() {
       if (data.success) {
         setShowSchemeModal(false);
         setCurrentScheme(null);
+        setFormError("");
         fetchSchemes();
+      } else {
+        setFormError(data.error || "சேமிப்பதில் பிழை ஏற்பட்டது.");
       }
     } catch (e) {
       console.error(e);
+      setFormError("இணைப்பில் பிழை (Connection error)");
     }
   };
 
@@ -241,14 +289,21 @@ export default function AdminDashboard() {
     try { rules = JSON.parse(scheme.eligibilityRules); } catch (e) {}
     
     // Parse docs
-    let docs = "";
+    let docs: string[] = [];
     try {
       const parsedDocs = JSON.parse(scheme.requiredDocuments);
-      if (Array.isArray(parsedDocs)) docs = parsedDocs.join(", ");
+      if (Array.isArray(parsedDocs)) {
+        docs = parsedDocs;
+      } else if (scheme.requiredDocuments) {
+        docs = scheme.requiredDocuments.split(",").map((d: any) => d.trim()).filter(Boolean);
+      }
     } catch (e) {
-      docs = scheme.requiredDocuments;
+      if (scheme.requiredDocuments) {
+        docs = scheme.requiredDocuments.split(",").map((d: any) => d.trim()).filter(Boolean);
+      }
     }
 
+    setFormError("");
     setSchemeForm({
       name: scheme.name,
       description: scheme.description,
@@ -274,13 +329,14 @@ export default function AdminDashboard() {
 
   const handleCreateSchemeClick = () => {
     setCurrentScheme(null);
+    setFormError("");
     setSchemeForm({
       name: "",
       description: "",
       category: "welfare",
       department: "",
       benefits: "",
-      requiredDocuments: "",
+      requiredDocuments: [],
       applicationProcedure: "",
       lastDate: "",
       officialLink: "",
@@ -942,6 +998,7 @@ export default function AdminDashboard() {
                     <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4 backdrop-blur-sm animate-fade-in">
                       <div className="w-full max-w-2xl bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto">
                         <button 
+                          type="button"
                           onClick={() => { setShowSchemeModal(false); setCurrentScheme(null); }}
                           className="absolute right-4 top-4 p-2 bg-slate-800 hover:bg-slate-750 rounded-full text-slate-400 transition"
                         >
@@ -951,6 +1008,13 @@ export default function AdminDashboard() {
                         <h3 className="text-lg font-bold mb-4">
                           {currentScheme ? "திட்ட திருத்தம் (Edit Scheme)" : "புதிய திட்ட உருவாக்கம் (Add Scheme)"}
                         </h3>
+
+                        {formError && (
+                          <div className="bg-rose-950/20 border border-rose-500/30 text-rose-400 p-3 rounded-xl text-xs mb-4 font-bold flex items-center justify-between animate-fade-in">
+                            <span>{formError}</span>
+                            <button type="button" onClick={() => setFormError("")} className="text-rose-400 hover:text-rose-300 font-bold ml-2">X</button>
+                          </div>
+                        )}
 
                         <form onSubmit={handleSaveScheme} className="flex flex-col gap-4 text-xs font-medium">
                           
@@ -1016,7 +1080,7 @@ export default function AdminDashboard() {
                               />
                             </div>
                             <div className="flex flex-col gap-1.5">
-                              <label className="text-slate-400 font-bold uppercase tracking-wider text-[10px]">இணைய இணைப்பு (Official Link)</label>
+                              <label className="text-slate-400 font-bold uppercase tracking-wider text-[10px]">அதிகாரப்பூர்வ விண்ணப்ப முகவரி (Official Application URL)</label>
                               <input
                                 type="url"
                                 placeholder="https://..."
@@ -1039,16 +1103,48 @@ export default function AdminDashboard() {
                                 className="bg-slate-950 border border-slate-850 focus:border-indigo-500 rounded-xl px-4 py-2.5 text-sm text-slate-100 focus:outline-none"
                               />
                             </div>
-                            <div className="flex flex-col gap-1.5">
-                              <label className="text-slate-400 font-bold uppercase tracking-wider text-[10px]">தேவைப்படும் ஆவணங்கள் (Required Documents - Comma separated)</label>
-                              <input
-                                type="text"
-                                required
-                                placeholder="Aadhaar Card, Income Certificate, Community Certificate"
-                                value={schemeForm.requiredDocuments}
-                                onChange={(e) => setSchemeForm({...schemeForm, requiredDocuments: e.target.value})}
-                                className="bg-slate-950 border border-slate-850 focus:border-indigo-500 rounded-xl px-4 py-2.5 text-sm text-slate-100 focus:outline-none"
-                              />
+                            <div className="flex flex-col gap-2">
+                              <label className="text-slate-400 font-bold uppercase tracking-wider text-[10px]">தேவைப்படும் ஆவணங்கள் (Required Documents)</label>
+                              <div className="flex flex-col gap-2 max-h-40 overflow-y-auto pr-1">
+                                {schemeForm.requiredDocuments.map((doc, idx) => (
+                                  <div key={idx} className="flex gap-2 items-center">
+                                    <input
+                                      type="text"
+                                      required
+                                      placeholder="ஆவணத்தின் பெயர் (e.g. Aadhaar Card)"
+                                      value={doc}
+                                      onChange={(e) => {
+                                        const newDocs = [...schemeForm.requiredDocuments];
+                                        newDocs[idx] = e.target.value;
+                                        setSchemeForm({ ...schemeForm, requiredDocuments: newDocs });
+                                      }}
+                                      className="flex-1 bg-slate-950 border border-slate-850 focus:border-indigo-500 rounded-xl px-4 py-2 text-sm text-slate-100 focus:outline-none"
+                                    />
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        const newDocs = schemeForm.requiredDocuments.filter((_, i) => i !== idx);
+                                        setSchemeForm({ ...schemeForm, requiredDocuments: newDocs });
+                                      }}
+                                      className="px-3 py-2 text-xs font-semibold text-rose-400 bg-rose-950/30 hover:bg-rose-950/60 border border-rose-900/50 rounded-xl transition-colors cursor-pointer"
+                                    >
+                                      Remove
+                                    </button>
+                                  </div>
+                                ))}
+                              </div>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setSchemeForm({
+                                    ...schemeForm,
+                                    requiredDocuments: [...schemeForm.requiredDocuments, ""]
+                                  });
+                                }}
+                                className="w-fit px-4 py-2 text-xs font-semibold text-indigo-400 bg-indigo-950/30 hover:bg-indigo-950/60 border border-indigo-900/50 rounded-xl transition-colors cursor-pointer mt-1"
+                              >
+                                + Add Document
+                              </button>
                             </div>
                           </div>
 

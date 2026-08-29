@@ -19,6 +19,7 @@ export interface MatchResult {
   isEligible: boolean;
   score: number; // 0 to 100
   reasons: string[];
+  scheme?: any;
 }
 
 export function matchScheme(profile: UserProfile, scheme: { id: string; name: string; eligibilityRules: string }): MatchResult {
@@ -216,7 +217,8 @@ export function matchScheme(profile: UserProfile, scheme: { id: string; name: st
     schemeName: scheme.name,
     isEligible,
     score,
-    reasons
+    reasons,
+    scheme
   };
 }
 

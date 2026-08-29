@@ -1031,6 +1031,76 @@ export default function CitizenPortal() {
                   )}
                 </div>
 
+                {/* Description, Eligibility, Benefits, Required Documents, and Official Application Link */}
+                {selectedScheme.scheme && (
+                  <div className="border-t border-slate-700 pt-4 flex flex-col gap-4">
+                    {selectedScheme.scheme.description && (
+                      <div className="flex flex-col gap-1.5">
+                        <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wide">திட்ட விளக்கம் (Description)</h4>
+                        <p className="text-sm text-slate-200 leading-relaxed bg-slate-900/40 border border-slate-700/30 rounded-xl p-3">{selectedScheme.scheme.description}</p>
+                      </div>
+                    )}
+
+                    {selectedScheme.reasons && selectedScheme.reasons.length > 0 && (
+                      <div className="flex flex-col gap-1.5">
+                        <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wide">தகுதி விவரங்கள் (Eligibility)</h4>
+                        <ul className="list-disc list-inside text-sm text-slate-300 leading-relaxed bg-slate-900/40 border border-slate-700/30 rounded-xl p-3 flex flex-col gap-1.5">
+                          {selectedScheme.reasons.map((reason: string, idx: number) => (
+                            <li key={idx} className="text-slate-200">{reason}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+
+                    {selectedScheme.scheme.benefits && (
+                      <div className="flex flex-col gap-1.5">
+                        <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wide">திட்ட பலன்கள் (Benefits)</h4>
+                        <p className="text-sm text-slate-200 leading-relaxed bg-slate-900/40 border border-slate-700/30 rounded-xl p-3">{selectedScheme.scheme.benefits}</p>
+                      </div>
+                    )}
+
+                    {selectedScheme.scheme.requiredDocuments && (
+                      <div className="flex flex-col gap-1.5">
+                        <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wide">தேவைப்படும் ஆவணங்கள் (Required Documents)</h4>
+                        <div className="flex flex-col gap-2 bg-slate-900/40 border border-slate-700/30 rounded-xl p-3.5">
+                          {(() => {
+                            let docs: string[] = [];
+                            try {
+                              const parsed = JSON.parse(selectedScheme.scheme.requiredDocuments);
+                              if (Array.isArray(parsed)) docs = parsed;
+                            } catch(e) {}
+                            if (docs.length === 0) return <p className="text-sm text-slate-400">ஆவணங்கள் எதுவும் தேவையில்லை.</p>;
+                            return docs.map((doc: string, idx: number) => (
+                              <div key={idx} className="flex items-center gap-2">
+                                <span className="text-blue-400 font-bold text-lg select-none">☐</span>
+                                <span className="text-sm text-slate-200">{doc}</span>
+                              </div>
+                            ));
+                          })()}
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="flex flex-col gap-1.5 mt-2">
+                      <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wide">அதிகாரப்பூர்வ விண்ணப்பம் (Official Application)</h4>
+                      {selectedScheme.scheme.officialLink ? (
+                        <a
+                          href={selectedScheme.scheme.officialLink}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="w-full py-3.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-center text-sm transition shadow-lg active:scale-98 flex items-center justify-center gap-2 cursor-pointer"
+                        >
+                          APPLY NOW →
+                        </a>
+                      ) : (
+                        <div className="w-full py-3.5 rounded-xl bg-slate-900/40 border border-slate-800 text-slate-500 font-medium text-center text-sm">
+                          Official application link not available
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
                 <button
                   onClick={() => {
                     voiceAgent?.cancelAll();
