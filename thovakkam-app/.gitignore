@@ -51,3 +51,6 @@ diff_page.txt
 
 /src/generated/prisma
 
+
+.vercel
+.env*
