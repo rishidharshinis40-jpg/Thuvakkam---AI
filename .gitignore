@@ -4,3 +4,6 @@ node-*.zip
 *.zip
 temp_node/
 node_modules/
+
+.vercel
+.env*
