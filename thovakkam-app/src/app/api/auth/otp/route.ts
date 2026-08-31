@@ -2,16 +2,25 @@ import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import nodemailer from "nodemailer";
 
-// Create SMTP Transporter configured from environment variables
-const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST,
-  port: parseInt(process.env.SMTP_PORT || "587"),
-  secure: process.env.SMTP_PORT === "465",
-  auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASS,
-  },
-});
+// Helper to create SMTP Transporter configured from environment variables
+function getTransporter() {
+  const host = process.env.SMTP_HOST || process.env.EMAIL_HOST || "smtp.gmail.com";
+  const port = parseInt(process.env.SMTP_PORT || process.env.EMAIL_PORT || "587");
+  const secure = port === 465 || process.env.SMTP_SECURE === "true";
+  const user = process.env.SMTP_USER || process.env.EMAIL_USER;
+  const pass = process.env.SMTP_PASS || process.env.SMTP_PASSWORD || process.env.EMAIL_PASSWORD;
+
+  return nodemailer.createTransport({
+    host,
+    port,
+    secure,
+    auth: {
+      user,
+      pass,
+    },
+  });
+}
+
 
 export async function POST(request: Request) {
   try {
@@ -45,8 +54,22 @@ export async function POST(request: Request) {
 
       // 3. Send email using SMTP
       try {
+        const user = process.env.SMTP_USER || process.env.EMAIL_USER;
+        const pass = process.env.SMTP_PASS || process.env.SMTP_PASSWORD || process.env.EMAIL_PASSWORD;
+        const from = process.env.SMTP_FROM || user;
+
+        if (!user || !pass) {
+          console.error("SMTP Error: SMTP_USER or SMTP_PASS environment variable is missing.");
+          return NextResponse.json(
+            { error: "மின்னஞ்சல் சேவை கட்டமைப்பு பிழை (SMTP credentials not configured in environment)." },
+            { status: 500 }
+          );
+        }
+
+        const transporter = getTransporter();
+
         await transporter.sendMail({
-          from: process.env.SMTP_FROM || process.env.SMTP_USER,
+          from,
           to: phone,
           subject: "துவக்கம் AI - உங்களது கடவுச்சொல் (OTP)",
           html: `
