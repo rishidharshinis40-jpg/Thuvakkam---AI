@@ -634,30 +634,30 @@ export default function CitizenPortal() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-slate-900 text-slate-100 font-sans">
+    <div className="flex flex-col min-h-screen bg-slate-900 text-slate-100 font-sans w-full overflow-x-hidden">
       {/* Top Header */}
-      <header className="flex items-center justify-between px-6 py-4 bg-slate-800/80 border-b border-slate-700 backdrop-blur sticky top-0 z-30">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center font-bold text-white text-lg shadow-lg shadow-blue-500/20">
+      <header className="flex items-center justify-between px-3 sm:px-6 py-3 sm:py-4 bg-slate-800/80 border-b border-slate-700 backdrop-blur sticky top-0 z-30 w-full">
+        <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+          <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-blue-600 flex items-center justify-center font-bold text-white text-base sm:text-lg shadow-lg shadow-blue-500/20 shrink-0">
             த
           </div>
-          <div>
-            <h1 className="text-xl font-bold tracking-wide bg-gradient-to-r from-blue-400 to-indigo-300 bg-clip-text text-transparent">
+          <div className="min-w-0">
+            <h1 className="text-lg sm:text-xl font-bold tracking-wide bg-gradient-to-r from-blue-400 to-indigo-300 bg-clip-text text-transparent truncate">
               துவக்கம் AI
             </h1>
-            <p className="text-[10px] text-slate-400 font-semibold tracking-wider uppercase">Thovakkam Tamil Voice Assistant</p>
+            <p className="text-[9px] sm:text-[10px] text-slate-400 font-semibold tracking-wider uppercase truncate">Thuvakkam Tamil Voice Assistant</p>
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3 shrink-0">
           <button
             onClick={() => { if (lastSpokenText) speakTamil(lastSpokenText); }}
             disabled={!lastSpokenText}
-            className="p-3 rounded-full transition bg-slate-700 text-emerald-400 hover:bg-slate-600 disabled:opacity-30 disabled:hover:bg-slate-700"
+            className="p-2.5 sm:p-3 rounded-full transition bg-slate-700 text-emerald-400 hover:bg-slate-600 disabled:opacity-30 disabled:hover:bg-slate-700 active:scale-90"
             aria-label="கடைசி செய்தியை மீண்டும் கேட்க (Replay last message)"
             title="Replay last message"
           >
-            <Play size={20} />
+            <Play size={18} className="sm:w-5 sm:h-5" />
           </button>
 
           {user && (
@@ -670,77 +670,77 @@ export default function CitizenPortal() {
                 setOtp("");
                 setAuthError("");
               }}
-              className="flex items-center gap-2 px-4 py-2 bg-rose-600/20 border border-rose-500/30 text-rose-300 rounded-lg hover:bg-rose-600/30 transition text-sm font-semibold"
+              className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 bg-rose-600/20 border border-rose-500/30 text-rose-300 rounded-lg hover:bg-rose-600/30 active:scale-95 transition text-xs sm:text-sm font-semibold"
               aria-label="வெளியேறு (Logout)"
             >
-              <LogOut size={16} />
-              <span className="hidden sm:inline">வெளியேறு</span>
+              <LogOut size={15} />
+              <span className="hidden xs:inline sm:inline">வெளியேறு</span>
             </button>
           )}
         </div>
       </header>
 
       {/* Main Container */}
-      <main className="flex flex-col flex-1 items-center justify-center p-4 max-w-xl mx-auto w-full">
+      <main className="flex flex-col flex-1 items-center justify-center p-3 sm:p-4 max-w-xl mx-auto w-full">
 
         {/* STEP 0: HOME PAGE */}
         {step === "home" && (
-          <div className="w-full flex flex-col gap-8 text-center animate-fade-in py-6">
-            <div className="flex flex-col items-center gap-4">
-              <div className="px-4 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-bold uppercase tracking-wider animate-pulse">
+          <div className="w-full flex flex-col gap-6 sm:gap-8 text-center animate-fade-in py-4 sm:py-6">
+            <div className="flex flex-col items-center gap-3 sm:gap-4">
+              <div className="px-3 sm:px-4 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[10px] sm:text-xs font-bold uppercase tracking-wider animate-pulse text-center">
                 தமிழக அரசு உதவித்தொகை திட்டங்கள்
               </div>
-              <h1 className="text-4xl sm:text-5xl font-black tracking-tight bg-gradient-to-r from-blue-400 via-indigo-300 to-emerald-400 bg-clip-text text-transparent">
+              <h1 className="text-3xl sm:text-5xl font-black tracking-tight bg-gradient-to-r from-blue-400 via-indigo-300 to-emerald-400 bg-clip-text text-transparent leading-tight">
                 துவக்கம் AI
               </h1>
-              <p className="text-sm sm:text-base text-slate-300 max-w-md mx-auto leading-relaxed font-medium">
+              <p className="text-xs sm:text-base text-slate-300 max-w-md mx-auto leading-relaxed font-medium px-2">
                 தமிழக அரசின் திட்டங்கள் மற்றும் கல்வி உதவித்தொகைகளை எளிய முறையில் கண்டறிந்து விண்ணப்பிக்க உதவும் குரல் வழி வழிகாட்டி.
               </p>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 w-full mt-2">
-              <div className="flex flex-col items-center p-5 rounded-2xl bg-slate-800/80 border border-slate-700/60 shadow-lg hover:border-blue-500/30 transition group">
-                <div className="w-12 h-12 rounded-xl bg-blue-600/10 border border-blue-500/20 flex items-center justify-center text-blue-400 group-hover:scale-110 transition mb-3">
-                  <Volume2 size={24} />
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 w-full mt-1">
+              <div className="flex flex-col items-center p-4 sm:p-5 rounded-2xl bg-slate-800/80 border border-slate-700/60 shadow-lg hover:border-blue-500/30 transition group text-center">
+                <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-blue-600/10 border border-blue-500/20 flex items-center justify-center text-blue-400 group-hover:scale-110 transition mb-2.5">
+                  <Volume2 size={22} className="sm:w-6 sm:h-6" />
                 </div>
                 <h3 className="font-bold text-sm text-slate-100 mb-1">குரல் வழி வழிகாட்டி</h3>
                 <p className="text-xs text-slate-400 leading-relaxed font-medium">AI-உடன் தமிழில் பேசி உங்களுக்குத் தேவையான திட்டங்களைத் தேடலாம்.</p>
               </div>
 
-              <div className="flex flex-col items-center p-5 rounded-2xl bg-slate-800/80 border border-slate-700/60 shadow-lg hover:border-emerald-500/30 transition group">
-                <div className="w-12 h-12 rounded-xl bg-emerald-600/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 group-hover:scale-110 transition mb-3">
-                  <Grid size={24} />
+              <div className="flex flex-col items-center p-4 sm:p-5 rounded-2xl bg-slate-800/80 border border-slate-700/60 shadow-lg hover:border-emerald-500/30 transition group text-center">
+                <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-emerald-600/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 group-hover:scale-110 transition mb-2.5">
+                  <Grid size={22} className="sm:w-6 sm:h-6" />
                 </div>
                 <h3 className="font-bold text-sm text-slate-100 mb-1">தகுதி பொருத்தம்</h3>
                 <p className="text-xs text-slate-400 leading-relaxed font-medium">உங்கள் விவரங்களுக்குப் பொருத்தமான திட்டங்களை உடனே கண்டறியலாம்.</p>
               </div>
 
-              <div className="flex flex-col items-center p-5 rounded-2xl bg-slate-800/80 border border-slate-700/60 shadow-lg hover:border-indigo-500/30 transition group">
-                <div className="w-12 h-12 rounded-xl bg-indigo-600/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400 group-hover:scale-110 transition mb-3">
-                  <FileText size={24} />
+              <div className="flex flex-col items-center p-4 sm:p-5 rounded-2xl bg-slate-800/80 border border-slate-700/60 shadow-lg hover:border-indigo-500/30 transition group text-center">
+                <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-indigo-600/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400 group-hover:scale-110 transition mb-2.5">
+                  <FileText size={22} className="sm:w-6 sm:h-6" />
                 </div>
                 <h3 className="font-bold text-sm text-slate-100 mb-1">எளிய விண்ணப்பம்</h3>
                 <p className="text-xs text-slate-400 leading-relaxed font-medium">தேவையான ஆவணங்களைப் புகைப்படம் எடுத்து எளிதாக விண்ணப்பிக்கலாம்.</p>
               </div>
             </div>
 
-            <div className="flex flex-col items-center gap-4 mt-4">
+            <div className="flex flex-col items-center gap-3 sm:gap-4 mt-2">
               <button
                 onClick={() => {
                   speakTamil("வணக்கம்! தமிழ்நாட்டின் அரசு உதவித்தொகை திட்டங்களைக் கண்டறிய உங்கள் மின்னஞ்சல் முகவரியை உள்ளிடவும்.");
                   setStep("auth");
                 }}
-                className="w-full max-w-xs py-4 rounded-xl bg-gradient-to-r from-blue-600 to-emerald-600 hover:from-blue-500 hover:to-emerald-500 text-white font-bold text-lg shadow-lg shadow-emerald-600/20 hover:shadow-emerald-500/30 active:scale-98 transition flex items-center justify-center gap-3"
+                className="w-full max-w-xs sm:max-w-sm py-3.5 sm:py-4 rounded-xl bg-gradient-to-r from-blue-600 to-emerald-600 hover:from-blue-500 hover:to-emerald-500 text-white font-bold text-base sm:text-lg shadow-lg shadow-emerald-600/20 hover:shadow-emerald-500/30 active:scale-98 transition flex items-center justify-center gap-2.5 sm:gap-3"
               >
                 <Play size={20} className="fill-white" />
                 தொடங்கவும் (Get Started)
               </button>
-              <p className="text-xs text-slate-500 font-medium">
+              <p className="text-[11px] sm:text-xs text-slate-500 font-medium">
                 பாதுகாப்பானது மற்றும் எளிமையானது • 100% Secure & Accessible
               </p>
               <a
                 href="/admin"
-                className="mt-2 text-xs text-slate-500 hover:text-indigo-400 transition font-bold flex items-center gap-1.5 underline underline-offset-4"
+                className="mt-1 text-xs text-slate-500 hover:text-indigo-400 transition font-bold flex items-center gap-1.5 underline underline-offset-4 py-1"
               >
                 <Lock size={12} />
                 அதிகாரிகள் தளம் (Admin Portal)
@@ -751,21 +751,21 @@ export default function CitizenPortal() {
 
         {/* STEP 1: AUTH EMAIL */}
         {step === "auth" && (
-          <div className="w-full flex flex-col gap-6 text-center animate-fade-in py-6">
+          <div className="w-full flex flex-col gap-5 sm:gap-6 text-center animate-fade-in py-4 sm:py-6">
             <button
               onClick={() => { setStep("home"); setAuthError(""); }}
-              className="flex items-center gap-2 text-slate-400 hover:text-slate-200 font-semibold mb-2 self-start text-sm transition"
+              className="flex items-center gap-2 text-slate-400 hover:text-slate-200 font-semibold mb-1 self-start text-xs sm:text-sm transition py-1"
             >
               <ArrowLeft size={16} />
               <span>முகப்புப் பக்கம் (Home)</span>
             </button>
 
             <div className="flex flex-col items-center">
-              <div className="w-16 h-16 rounded-full bg-blue-600/10 border border-blue-500/20 flex items-center justify-center text-blue-400 mb-4 shadow-inner">
-                <Mail size={32} />
+              <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-blue-600/10 border border-blue-500/20 flex items-center justify-center text-blue-400 mb-3 sm:mb-4 shadow-inner">
+                <Mail size={28} className="sm:w-8 sm:h-8" />
               </div>
-              <h2 className="text-2xl font-bold">மின்னஞ்சல் முகவரி</h2>
-              <p className="text-slate-400 mt-2 text-sm">உள்நுழைய உங்கள் மின்னஞ்சல் முகவரியை உள்ளிடவும்.</p>
+              <h2 className="text-xl sm:text-2xl font-bold">மின்னஞ்சல் முகவரி</h2>
+              <p className="text-slate-400 mt-1.5 text-xs sm:text-sm px-2">உள்நுழைய உங்கள் மின்னஞ்சல் முகவரியை உள்ளிடவும்.</p>
             </div>
 
             <div className="w-full flex flex-col text-left gap-1.5 max-w-sm mx-auto">
@@ -775,25 +775,25 @@ export default function CitizenPortal() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="rishidharshinis40@gmail.com"
-                className="w-full bg-slate-800 border border-slate-700 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 py-3.5 px-4 rounded-xl text-base text-slate-100 shadow-inner outline-none transition"
+                className="w-full bg-slate-800 border border-slate-700 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 py-3 sm:py-3.5 px-3.5 sm:px-4 rounded-xl text-sm sm:text-base text-slate-100 shadow-inner outline-none transition"
               />
             </div>
 
             {authError && (
-              <div className="mx-auto flex items-center gap-2 px-4 py-2 bg-rose-500/10 border border-rose-500/30 text-rose-400 rounded-lg text-sm font-semibold max-w-sm text-left animate-fade-in">
+              <div className="mx-auto flex items-center gap-2 px-3.5 py-2 bg-rose-500/10 border border-rose-500/30 text-rose-400 rounded-lg text-xs sm:text-sm font-semibold max-w-sm text-left animate-fade-in w-full">
                 <AlertCircle size={16} className="shrink-0" />
-                <span>{authError}</span>
+                <span className="break-words-all">{authError}</span>
               </div>
             )}
 
             <button
               onClick={handleSendOtp}
               disabled={isAuthLoading || !email}
-              className="mt-2 w-full max-w-sm mx-auto py-4 rounded-xl bg-blue-600 hover:bg-blue-500 disabled:opacity-40 disabled:hover:bg-blue-600 text-white font-bold text-lg shadow-lg shadow-blue-500/20 active:scale-98 transition flex items-center justify-center gap-2"
+              className="mt-1 w-full max-w-sm mx-auto py-3.5 sm:py-4 rounded-xl bg-blue-600 hover:bg-blue-500 disabled:opacity-40 disabled:hover:bg-blue-600 text-white font-bold text-base sm:text-lg shadow-lg shadow-blue-500/20 active:scale-98 transition flex items-center justify-center gap-2"
             >
               {isAuthLoading ? (
                 <>
-                  <RefreshCw className="animate-spin" size={20} />
+                  <RefreshCw className="animate-spin" size={18} />
                   அனுப்பப்படுகிறது...
                 </>
               ) : (
@@ -805,66 +805,66 @@ export default function CitizenPortal() {
 
         {/* STEP 2: OTP VERIFY */}
         {step === "otp" && (
-          <div className="w-full flex flex-col gap-6 text-center animate-fade-in py-6">
+          <div className="w-full flex flex-col gap-4 sm:gap-6 text-center animate-fade-in py-3 sm:py-6 max-w-sm mx-auto">
             <div className="flex flex-col items-center">
-              <div className="w-16 h-16 rounded-full bg-emerald-600/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 mb-4 shadow-inner">
-                <CheckCircle size={32} />
+              <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-emerald-600/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 mb-2 sm:mb-4 shadow-inner">
+                <CheckCircle size={28} className="sm:w-8 sm:h-8" />
               </div>
-              <h2 className="text-2xl font-bold">கடவுச்சொல்</h2>
-              <p className="text-slate-400 mt-2 text-sm">மின்னஞ்சலுக்கு அனுப்பப்பட்ட 6 இலக்க கடவுச்சொல்லை உள்ளிடவும்.</p>
+              <h2 className="text-xl sm:text-2xl font-bold">கடவுச்சொல்</h2>
+              <p className="text-slate-400 mt-1 text-xs sm:text-sm px-2">மின்னஞ்சலுக்கு அனுப்பப்பட்ட 6 இலக்க கடவுச்சொல்லை உள்ளிடவும்.</p>
             </div>
 
-            <div className="w-full bg-slate-800 border border-slate-700 py-4 px-6 rounded-xl text-3xl font-mono tracking-[1rem] text-emerald-400 h-16 flex items-center justify-center shadow-inner">
+            <div className="w-full bg-slate-800 border border-slate-700 py-3 sm:py-4 px-2 sm:px-6 rounded-xl text-xl sm:text-3xl font-mono tracking-[0.4rem] xs:tracking-[0.7rem] sm:tracking-[1rem] text-emerald-400 h-13 sm:h-16 flex items-center justify-center shadow-inner overflow-hidden select-none">
               {otp ? otp.padEnd(6, "•").split("").map((c, i) => (
                 <span key={i} className={otp[i] ? "text-emerald-400" : "text-slate-600"}>{c}</span>
               )) : "••••••"}
             </div>
 
-            <div className="grid grid-cols-3 gap-3 max-w-sm mx-auto w-full">
+            <div className="grid grid-cols-3 gap-2 sm:gap-3 w-full">
               {["1", "2", "3", "4", "5", "6", "7", "8", "9"].map((num) => (
                 <button
                   key={num}
                   onClick={() => handleOtpDial(num)}
-                  className="h-16 rounded-xl bg-slate-800 hover:bg-slate-700 active:scale-95 transition font-bold text-xl flex items-center justify-center border border-slate-700/50 shadow"
+                  className="h-12 sm:h-16 rounded-xl bg-slate-800 hover:bg-slate-700 active:scale-95 transition font-bold text-lg sm:text-xl flex items-center justify-center border border-slate-700/50 shadow"
                 >
                   {num}
                 </button>
               ))}
               <button
                 onClick={() => setOtp("")}
-                className="h-16 rounded-xl bg-slate-800/50 text-rose-400 hover:bg-rose-600/20 transition text-sm font-semibold flex items-center justify-center border border-slate-700/50"
+                className="h-12 sm:h-16 rounded-xl bg-slate-800/50 text-rose-400 hover:bg-rose-600/20 active:scale-95 transition text-xs sm:text-sm font-semibold flex items-center justify-center border border-slate-700/50"
               >
                 அழி
               </button>
               <button
                 onClick={() => handleOtpDial("0")}
-                className="h-16 rounded-xl bg-slate-800 hover:bg-slate-700 active:scale-95 transition font-bold text-xl flex items-center justify-center border border-slate-700/50 shadow"
+                className="h-12 sm:h-16 rounded-xl bg-slate-800 hover:bg-slate-700 active:scale-95 transition font-bold text-lg sm:text-xl flex items-center justify-center border border-slate-700/50 shadow"
               >
                 0
               </button>
               <button
                 onClick={() => setOtp(prev => prev.slice(0, -1))}
-                className="h-16 rounded-xl bg-slate-800/50 text-slate-300 hover:bg-slate-700 transition flex items-center justify-center border border-slate-700/50"
+                className="h-12 sm:h-16 rounded-xl bg-slate-800/50 text-slate-300 hover:bg-slate-700 active:scale-95 transition flex items-center justify-center border border-slate-700/50"
               >
-                <Undo2 size={20} />
+                <Undo2 size={18} />
               </button>
             </div>
 
             {authError && (
-              <div className="mx-auto flex items-center gap-2 px-4 py-2 bg-rose-500/10 border border-rose-500/30 text-rose-400 rounded-lg text-sm font-semibold max-w-sm text-left animate-fade-in">
+              <div className="mx-auto flex items-center gap-2 px-3.5 py-2 bg-rose-500/10 border border-rose-500/30 text-rose-400 rounded-lg text-xs sm:text-sm font-semibold text-left animate-fade-in w-full">
                 <AlertCircle size={16} className="shrink-0" />
-                <span>{authError}</span>
+                <span className="break-words-all">{authError}</span>
               </div>
             )}
 
             <button
               onClick={handleVerifyOtp}
               disabled={isAuthLoading || otp.length !== 6}
-              className="mt-4 w-full py-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 disabled:opacity-40 disabled:hover:bg-emerald-600 text-white font-bold text-lg shadow-lg shadow-emerald-500/20 active:scale-98 transition flex items-center justify-center gap-2"
+              className="mt-1 w-full py-3.5 sm:py-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 disabled:opacity-40 disabled:hover:bg-emerald-600 text-white font-bold text-base sm:text-lg shadow-lg shadow-emerald-500/20 active:scale-98 transition flex items-center justify-center gap-2"
             >
               {isAuthLoading ? (
                 <>
-                  <RefreshCw className="animate-spin" size={20} />
+                  <RefreshCw className="animate-spin" size={18} />
                   சரிபார்க்கப்படுகிறது...
                 </>
               ) : (
@@ -874,7 +874,7 @@ export default function CitizenPortal() {
 
             <button
               onClick={() => { setStep("auth"); setEmail(""); setOtp(""); setAuthError(""); }}
-              className="text-sm text-slate-400 hover:text-slate-200 transition font-semibold"
+              className="text-xs sm:text-sm text-slate-400 hover:text-slate-200 transition font-semibold py-1"
             >
               மின்னஞ்சலை மாற்றவும்
             </button>
@@ -883,35 +883,35 @@ export default function CitizenPortal() {
 
         {/* STEP 3: CITIZEN DASHBOARD */}
         {step === "dashboard" && (
-          <div className="w-full flex flex-col gap-6 py-4 animate-fade-in">
-            <div className="bg-gradient-to-br from-blue-900/60 to-indigo-950/60 border border-blue-500/20 rounded-2xl p-6 shadow-xl relative overflow-hidden">
-              <div className="absolute right-0 bottom-0 opacity-10 pointer-events-none">
-                <Mic size={150} />
+          <div className="w-full flex flex-col gap-5 sm:gap-6 py-2 sm:py-4 animate-fade-in">
+            <div className="bg-gradient-to-br from-blue-900/60 to-indigo-950/60 border border-blue-500/20 rounded-2xl p-4 sm:p-6 shadow-xl relative overflow-hidden">
+              <div className="absolute right-0 bottom-0 opacity-10 pointer-events-none hidden xs:block">
+                <Mic size={140} />
               </div>
-              <h2 className="text-xl font-bold mb-1">வரவேற்கிறோம், {user?.name || "அன்பர்"}!</h2>
-              <p className="text-xs text-blue-300 font-medium">மின்னஞ்சல்: {user?.phone}</p>
+              <h2 className="text-lg sm:text-xl font-bold mb-1 break-words-all">வரவேற்கிறோம், {user?.name || "அன்பர்"}!</h2>
+              <p className="text-xs text-blue-300 font-medium truncate">மின்னஞ்சல்: {user?.phone}</p>
 
               <button
                 onClick={startConversation}
-                className="mt-6 w-full py-4 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-lg shadow-lg shadow-blue-500/30 active:scale-98 transition flex items-center justify-center gap-3"
+                className="mt-5 sm:mt-6 w-full py-3.5 sm:py-4 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-base sm:text-lg shadow-lg shadow-blue-500/30 active:scale-98 transition flex items-center justify-center gap-2.5 sm:gap-3"
               >
-                <Mic size={24} className="animate-pulse" />
+                <Mic size={22} className="animate-pulse" />
                 திட்டங்களை கண்டறி (Start Search)
               </button>
             </div>
 
-            <div className="flex flex-col gap-4">
-              <h3 className="text-lg font-bold flex items-center gap-2 text-slate-300">
-                <FileText size={20} className="text-blue-400" />
-                விண்ணப்பங்களின் நிலை (Application Status)
+            <div className="flex flex-col gap-3 sm:gap-4">
+              <h3 className="text-base sm:text-lg font-bold flex items-center gap-2 text-slate-300">
+                <FileText size={18} className="text-blue-400 shrink-0" />
+                <span>விண்ணப்பங்களின் நிலை (Application Status)</span>
               </h3>
 
               {userApplications.length === 0 ? (
-                <div className="bg-slate-800/40 border border-slate-700/50 rounded-xl p-8 text-center text-slate-500 font-medium">
+                <div className="bg-slate-800/40 border border-slate-700/50 rounded-xl p-6 sm:p-8 text-center text-slate-500 text-xs sm:text-sm font-medium">
                   விண்ணப்பங்கள் எதுவும் இல்லை. (No applications found.)
                 </div>
               ) : (
-                <div className="flex flex-col gap-3">
+                <div className="flex flex-col gap-2.5 sm:gap-3">
                   {userApplications.map((app: any) => {
                     const statusTextMap = {
                       pending: "ஆய்வில் உள்ளது (Pending)",
@@ -930,13 +930,13 @@ export default function CitizenPortal() {
                     return (
                       <div
                         key={app.id}
-                        className="bg-slate-800/80 border border-slate-700 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow hover:border-slate-600 transition"
+                        className="bg-slate-800/80 border border-slate-700 rounded-xl p-3.5 sm:p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-3 shadow hover:border-slate-600 transition"
                       >
-                        <div>
-                          <h4 className="font-bold text-sm text-slate-200 line-clamp-1">{app.scheme.name}</h4>
+                        <div className="min-w-0">
+                          <h4 className="font-bold text-xs sm:text-sm text-slate-200 line-clamp-2 break-words-all">{app.scheme.name}</h4>
                           <p className="text-[10px] text-slate-400 mt-1">விண்ணப்பித்த தேதி: {new Date(app.submittedAt).toLocaleDateString("en-GB")}</p>
                         </div>
-                        <span className={`px-3 py-1.5 rounded-full border text-xs font-bold shrink-0 self-start sm:self-auto ${statusColorMap[app.status as keyof typeof statusColorMap]}`}>
+                        <span className={`px-2.5 py-1 rounded-full border text-[10px] sm:text-xs font-bold shrink-0 self-start sm:self-auto ${statusColorMap[app.status as keyof typeof statusColorMap]}`}>
                           {statusTextMap[app.status as keyof typeof statusTextMap] || app.status}
                         </span>
                       </div>
@@ -950,22 +950,22 @@ export default function CitizenPortal() {
 
         {/* STEP 4: ADAPTIVE VOICE CHAT */}
         {step === "chat" && (
-          <div className="w-full flex flex-col flex-1 h-[70vh] py-2 animate-fade-in">
+          <div className="w-full flex flex-col flex-1 h-[calc(100dvh-130px)] sm:h-[72vh] max-h-[720px] py-1 sm:py-2 animate-fade-in">
             <button
               onClick={() => { voiceAgent?.cancelAll(); setStep("dashboard"); }}
-              className="flex items-center gap-2 text-slate-400 hover:text-slate-200 font-semibold mb-3 self-start text-sm"
+              className="flex items-center gap-1.5 sm:gap-2 text-slate-400 hover:text-slate-200 font-semibold mb-2 self-start text-xs sm:text-sm py-1"
             >
               <ArrowLeft size={16} />
-              முதன்மை மெனு (Main Menu)
+              <span>முதன்மை மெனு (Main Menu)</span>
             </button>
 
-            <div className="flex-1 overflow-y-auto bg-slate-950/40 border border-slate-800 rounded-2xl p-4 flex flex-col gap-4 max-h-[40vh] sm:max-h-[50vh] shadow-inner mb-4">
+            <div className="flex-1 overflow-y-auto bg-slate-950/40 border border-slate-800 rounded-2xl p-3 sm:p-4 flex flex-col gap-3 sm:gap-4 max-h-[42vh] sm:max-h-[48vh] shadow-inner mb-3">
               {messages.map((m, idx) => (
                 <div
                   key={idx}
                   className={`flex ${m.sender === "user" ? "justify-end" : "justify-start"} animate-fade-in`}
                 >
-                  <div className={`max-w-[85%] rounded-2xl px-4 py-3 text-sm font-medium leading-relaxed shadow ${m.sender === "user"
+                  <div className={`max-w-[88%] sm:max-w-[85%] rounded-2xl px-3.5 py-2.5 sm:px-4 sm:py-3 text-xs sm:text-sm font-medium leading-relaxed shadow break-words-all ${m.sender === "user"
                     ? "bg-blue-600 text-white rounded-br-none"
                     : "bg-slate-800 text-slate-200 border border-slate-700/80 rounded-bl-none"
                     }`}>
@@ -976,26 +976,26 @@ export default function CitizenPortal() {
               <div ref={chatEndRef} />
             </div>
 
-            <div className="grid grid-cols-5 gap-2 px-2 py-1 mb-4 border border-slate-800/40 rounded-xl bg-slate-800/10 text-[9px] uppercase font-bold text-center text-slate-500">
-              <span className={profile.name ? "text-emerald-400" : ""}>பெயர்</span>
-              <span className={profile.age ? "text-emerald-400" : ""}>வயது</span>
-              <span className={profile.district ? "text-emerald-400" : ""}>மாவட்டம்</span>
-              <span className={profile.isStudent !== undefined ? "text-emerald-400" : ""}>தொழில்</span>
-              <span className={profile.annualIncome ? "text-emerald-400" : ""}>வருமானம்</span>
+            <div className="grid grid-cols-5 gap-1 px-1.5 py-1 mb-3 border border-slate-800/40 rounded-xl bg-slate-800/10 text-[8px] sm:text-[9px] uppercase font-bold text-center text-slate-500 overflow-hidden">
+              <span className={`truncate ${profile.name ? "text-emerald-400" : ""}`}>பெயர்</span>
+              <span className={`truncate ${profile.age ? "text-emerald-400" : ""}`}>வயது</span>
+              <span className={`truncate ${profile.district ? "text-emerald-400" : ""}`}>மாவட்டம்</span>
+              <span className={`truncate ${profile.isStudent !== undefined ? "text-emerald-400" : ""}`}>தொழில்</span>
+              <span className={`truncate ${profile.annualIncome ? "text-emerald-400" : ""}`}>வருமானம்</span>
             </div>
 
-            <div className="flex flex-col items-center gap-4 mt-auto">
+            <div className="flex flex-col items-center gap-3 sm:gap-4 mt-auto">
               <div className="relative">
                 {isListening && (
-                  <span className="absolute -inset-4 rounded-full bg-emerald-500/20 animate-ping pointer-events-none" />
+                  <span className="absolute -inset-3 sm:-inset-4 rounded-full bg-emerald-500/20 animate-ping pointer-events-none" />
                 )}
                 {isSpeaking && (
-                  <span className="absolute -inset-3 rounded-full bg-blue-500/10 border-2 border-blue-500/30 animate-pulse pointer-events-none" />
+                  <span className="absolute -inset-2.5 sm:-inset-3 rounded-full bg-blue-500/10 border-2 border-blue-500/30 animate-pulse pointer-events-none" />
                 )}
 
                 <button
                   onClick={handleMicTap}
-                  className={`w-24 h-24 rounded-full flex items-center justify-center shadow-xl active:scale-95 transition border-4 ${isListening
+                  className={`w-20 h-20 sm:w-24 sm:h-24 rounded-full flex items-center justify-center shadow-xl active:scale-95 transition border-4 ${isListening
                     ? "bg-emerald-600 hover:bg-emerald-500 border-emerald-400 text-white shadow-emerald-600/30"
                     : isSpeaking
                       ? "bg-blue-700 hover:bg-blue-600 border-blue-400 text-white shadow-blue-600/30"
@@ -1006,16 +1006,16 @@ export default function CitizenPortal() {
                   aria-label={isListening ? "கேட்கிறது (Listening - Tap to stop)" : "பேசுவதற்கு அழுத்தவும் (Tap to Speak)"}
                 >
                   {statusText === "THINKING" ? (
-                    <RefreshCw size={36} className="animate-spin" />
+                    <RefreshCw size={30} className="animate-spin sm:w-9 sm:h-9" />
                   ) : isListening ? (
-                    <Mic size={36} className="animate-bounce" />
+                    <Mic size={30} className="animate-bounce sm:w-9 sm:h-9" />
                   ) : (
-                    <Mic size={36} />
+                    <Mic size={30} className="sm:w-9 sm:h-9" />
                   )}
                 </button>
               </div>
 
-              <p className={`text-xs font-bold uppercase tracking-wider ${isListening ? "text-emerald-400 animate-pulse" : isSpeaking ? "text-blue-400" : "text-slate-400"
+              <p className={`text-[11px] sm:text-xs font-bold uppercase tracking-wider text-center ${isListening ? "text-emerald-400 animate-pulse" : isSpeaking ? "text-blue-400" : "text-slate-400"
                 }`}>
                 {isListening
                   ? "துவக்கம் கேட்கிறது... பேசவும்"
@@ -1026,10 +1026,10 @@ export default function CitizenPortal() {
                       : "பேசுவதற்கு மைக் அழுத்தவும்"}
               </p>
 
-              <div className="w-full flex gap-2 border-t border-slate-800 pt-4 mt-2">
+              <div className="w-full flex gap-2 border-t border-slate-800 pt-3 mt-1">
                 <input
                   type="text"
-                  placeholder="குரலுக்கு பதிலாக தட்டச்சு செய்யவும்... (Dev Mode)"
+                  placeholder="குரலுக்கு பதிலாக தட்டச்சு செய்யவும்..."
                   value={devInput}
                   onChange={(e) => setDevInput(e.target.value)}
                   onKeyDown={(e) => {
@@ -1038,14 +1038,14 @@ export default function CitizenPortal() {
                       setDevInput("");
                     }
                   }}
-                  className="flex-1 bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-blue-500"
+                  className="flex-1 min-w-0 bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-xs sm:text-sm text-slate-100 focus:outline-none focus:border-blue-500"
                 />
                 <button
                   onClick={() => {
                     handleUserInput(devInput);
                     setDevInput("");
                   }}
-                  className="bg-slate-700 hover:bg-slate-600 px-4 rounded-lg text-xs font-bold"
+                  className="bg-slate-700 hover:bg-slate-600 px-3 sm:px-4 rounded-lg text-xs font-bold shrink-0"
                 >
                   அனுப்பு
                 </button>
@@ -1054,7 +1054,7 @@ export default function CitizenPortal() {
               {isComplete && (
                 <button
                   onClick={() => setStep("recommendations")}
-                  className="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl active:scale-98 transition flex items-center justify-center gap-2"
+                  className="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl active:scale-98 transition flex items-center justify-center gap-2 text-sm sm:text-base shadow-lg shadow-emerald-600/20"
                 >
                   <BookOpen size={18} />
                   பொருந்தும் திட்டங்களைக் காட்டு (Show Schemes)
@@ -1066,36 +1066,36 @@ export default function CitizenPortal() {
 
         {/* STEP 5: RECOMMENDATIONS */}
         {step === "recommendations" && (
-          <div className="w-full flex flex-col gap-6 py-4 animate-fade-in">
-            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+          <div className="w-full flex flex-col gap-4 sm:gap-6 py-2 sm:py-4 animate-fade-in">
+            <div className="flex items-center justify-between border-b border-slate-800 pb-3 gap-2">
               <button
                 onClick={() => { voiceAgent?.cancelAll(); setStep("chat"); }}
-                className="flex items-center gap-2 text-slate-400 hover:text-slate-200 font-semibold text-sm"
+                className="flex items-center gap-1.5 sm:gap-2 text-slate-400 hover:text-slate-200 font-semibold text-xs sm:text-sm py-1"
               >
                 <ArrowLeft size={16} />
-                உரையாடல் (Back to chat)
+                <span>உரையாடல் (Back)</span>
               </button>
-              <h2 className="font-bold text-slate-300">உங்களுக்கான திட்டங்கள்</h2>
+              <h2 className="font-bold text-sm sm:text-base text-slate-300 truncate">உங்களுக்கான திட்டங்கள்</h2>
             </div>
 
             {selectedScheme ? (
-              <div className="flex flex-col gap-4 bg-slate-800 border border-slate-700 rounded-2xl p-5 shadow-xl animate-scale-in">
+              <div className="flex flex-col gap-4 bg-slate-800 border border-slate-700 rounded-2xl p-4 sm:p-5 shadow-xl animate-scale-in">
                 <button
                   onClick={() => { voiceAgent?.cancelAll(); setSelectedScheme(null); }}
-                  className="flex items-center gap-1.5 text-xs text-blue-400 hover:text-blue-300 font-bold self-start"
+                  className="flex items-center gap-1.5 text-xs text-blue-400 hover:text-blue-300 font-bold self-start py-1"
                 >
                   <ArrowLeft size={14} /> திட்டங்கள் பட்டியல் (All Schemes)
                 </button>
 
-                <h3 className="text-xl font-bold leading-tight">{selectedScheme.schemeName}</h3>
+                <h3 className="text-lg sm:text-xl font-bold leading-tight break-words-all">{selectedScheme.schemeName}</h3>
 
-                <div className="bg-slate-950/40 border border-slate-700/50 rounded-xl p-4 text-sm leading-relaxed text-slate-200 flex items-start gap-3">
-                  <span className="flex-1">{schemeExplanation || "விளக்கம் பெறப்படுகிறது..."}</span>
+                <div className="bg-slate-950/40 border border-slate-700/50 rounded-xl p-3.5 sm:p-4 text-xs sm:text-sm leading-relaxed text-slate-200 flex items-start gap-2.5 sm:gap-3">
+                  <span className="flex-1 break-words-all">{schemeExplanation || "விளக்கம் பெறப்படுகிறது..."}</span>
 
                   {schemeExplanation && (
                     <button
                       onClick={() => speakTamil(schemeExplanation)}
-                      className="shrink-0 w-9 h-9 rounded-full bg-blue-600/20 hover:bg-blue-600/30 border border-blue-500/30 flex items-center justify-center transition active:scale-90"
+                      className="shrink-0 w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-blue-600/20 hover:bg-blue-600/30 border border-blue-500/30 flex items-center justify-center transition active:scale-90"
                       aria-label="மீண்டும் கேட்க (Replay explanation)"
                       title="மீண்டும் கேட்க"
                     >
@@ -1104,13 +1104,13 @@ export default function CitizenPortal() {
                   )}
                 </div>
 
-                <div className="border-t border-slate-700 pt-4 flex flex-col gap-3">
-                  <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wide">திட்டம் பற்றி கேள்வி கேளுங்கள் (Ask Follow-up)</h4>
+                <div className="border-t border-slate-700 pt-3.5 flex flex-col gap-2.5 sm:gap-3">
+                  <h4 className="text-[11px] sm:text-xs font-bold text-slate-400 uppercase tracking-wide">திட்டம் பற்றி கேள்வி கேளுங்கள் (Ask Follow-up)</h4>
 
-                  <div className="flex items-center gap-2">
+                  <div className="flex flex-col xs:flex-row items-stretch xs:items-center gap-2">
                     <button
                       onClick={handleFollowUpMicTap}
-                      className={`w-12 h-12 rounded-xl flex items-center justify-center transition border ${isFollowUpListening
+                      className={`h-11 xs:w-12 rounded-xl flex items-center justify-center transition border shrink-0 ${isFollowUpListening
                         ? "bg-emerald-600 border-emerald-400 text-white animate-pulse"
                         : "bg-slate-700 hover:bg-slate-600 border-slate-600 text-slate-200"
                         }`}
@@ -1118,12 +1118,13 @@ export default function CitizenPortal() {
                       title="Tap and ask a follow-up question"
                     >
                       <Mic size={20} />
+                      <span className="xs:hidden ml-2 text-xs font-bold">குரல் வழி கேட்கவும்</span>
                     </button>
 
-                    <div className="flex-1 flex gap-2">
+                    <div className="flex-1 flex gap-2 min-w-0">
                       <input
                         type="text"
-                        placeholder="எ.கா. என்ன ஆவணங்கள் தேவை? (Ask a question...)"
+                        placeholder="எ.கா. என்ன ஆவணங்கள் தேவை?"
                         value={followUpQuestion}
                         onChange={(e) => setFollowUpQuestion(e.target.value)}
                         onKeyDown={(e) => {
@@ -1131,11 +1132,11 @@ export default function CitizenPortal() {
                             askFollowUp(followUpQuestion);
                           }
                         }}
-                        className="flex-1 bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none"
+                        className="flex-1 min-w-0 bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs sm:text-sm text-slate-100 focus:outline-none"
                       />
                       <button
                         onClick={() => askFollowUp(followUpQuestion)}
-                        className="px-4 py-2 bg-slate-700 hover:bg-slate-600 rounded-lg text-xs font-bold"
+                        className="px-3.5 sm:px-4 py-2 bg-slate-700 hover:bg-slate-600 rounded-lg text-xs font-bold shrink-0"
                       >
                         தேடு
                       </button>
@@ -1143,7 +1144,7 @@ export default function CitizenPortal() {
                   </div>
 
                   {followUpAnswer && (
-                    <div className="bg-blue-950/20 border border-blue-500/20 text-blue-300 rounded-xl p-3 text-xs leading-relaxed animate-fade-in">
+                    <div className="bg-blue-950/20 border border-blue-500/20 text-blue-300 rounded-xl p-3 text-xs leading-relaxed animate-fade-in break-words-all">
                       <span className="font-bold text-[10px] block text-blue-400 uppercase tracking-wider mb-1">பதில் (Answer):</span>
                       {followUpAnswer}
                     </div>
@@ -1152,20 +1153,20 @@ export default function CitizenPortal() {
 
                 {/* Description, Eligibility, Benefits, Required Documents, and Official Application Link */}
                 {selectedScheme.scheme && (
-                  <div className="border-t border-slate-700 pt-4 flex flex-col gap-4">
+                  <div className="border-t border-slate-700 pt-4 flex flex-col gap-3.5 sm:gap-4">
                     {selectedScheme.scheme.description && (
                       <div className="flex flex-col gap-1.5">
-                        <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wide">திட்ட விளக்கம் (Description)</h4>
-                        <p className="text-sm text-slate-200 leading-relaxed bg-slate-900/40 border border-slate-700/30 rounded-xl p-3">{selectedScheme.scheme.description}</p>
+                        <h4 className="text-[11px] sm:text-xs font-bold text-slate-400 uppercase tracking-wide">திட்ட விளக்கம் (Description)</h4>
+                        <p className="text-xs sm:text-sm text-slate-200 leading-relaxed bg-slate-900/40 border border-slate-700/30 rounded-xl p-3 break-words-all">{selectedScheme.scheme.description}</p>
                       </div>
                     )}
 
                     {selectedScheme.reasons && selectedScheme.reasons.length > 0 && (
                       <div className="flex flex-col gap-1.5">
-                        <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wide">தகுதி விவரங்கள் (Eligibility)</h4>
-                        <ul className="list-disc list-inside text-sm text-slate-300 leading-relaxed bg-slate-900/40 border border-slate-700/30 rounded-xl p-3 flex flex-col gap-1.5">
+                        <h4 className="text-[11px] sm:text-xs font-bold text-slate-400 uppercase tracking-wide">தகுதி விவரங்கள் (Eligibility)</h4>
+                        <ul className="list-disc list-inside text-xs sm:text-sm text-slate-300 leading-relaxed bg-slate-900/40 border border-slate-700/30 rounded-xl p-3 flex flex-col gap-1.5">
                           {selectedScheme.reasons.map((reason: string, idx: number) => (
-                            <li key={idx} className="text-slate-200">{reason}</li>
+                            <li key={idx} className="text-slate-200 break-words-all">{reason}</li>
                           ))}
                         </ul>
                       </div>
@@ -1173,26 +1174,26 @@ export default function CitizenPortal() {
 
                     {selectedScheme.scheme.benefits && (
                       <div className="flex flex-col gap-1.5">
-                        <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wide">திட்ட பலன்கள் (Benefits)</h4>
-                        <p className="text-sm text-slate-200 leading-relaxed bg-slate-900/40 border border-slate-700/30 rounded-xl p-3">{selectedScheme.scheme.benefits}</p>
+                        <h4 className="text-[11px] sm:text-xs font-bold text-slate-400 uppercase tracking-wide">திட்ட பலன்கள் (Benefits)</h4>
+                        <p className="text-xs sm:text-sm text-slate-200 leading-relaxed bg-slate-900/40 border border-slate-700/30 rounded-xl p-3 break-words-all">{selectedScheme.scheme.benefits}</p>
                       </div>
                     )}
 
                     {selectedScheme.scheme.requiredDocuments && (
                       <div className="flex flex-col gap-1.5">
-                        <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wide">தேவைப்படும் ஆவணங்கள் (Required Documents)</h4>
-                        <div className="flex flex-col gap-2 bg-slate-900/40 border border-slate-700/30 rounded-xl p-3.5">
+                        <h4 className="text-[11px] sm:text-xs font-bold text-slate-400 uppercase tracking-wide">தேவைப்படும் ஆவணங்கள் (Required Documents)</h4>
+                        <div className="flex flex-col gap-2 bg-slate-900/40 border border-slate-700/30 rounded-xl p-3 sm:p-3.5">
                           {(() => {
                             let docs: string[] = [];
                             try {
                               const parsed = JSON.parse(selectedScheme.scheme.requiredDocuments);
                               if (Array.isArray(parsed)) docs = parsed;
                             } catch(e) {}
-                            if (docs.length === 0) return <p className="text-sm text-slate-400">ஆவணங்கள் எதுவும் தேவையில்லை.</p>;
+                            if (docs.length === 0) return <p className="text-xs sm:text-sm text-slate-400">ஆவணங்கள் எதுவும் தேவையில்லை.</p>;
                             return docs.map((doc: string, idx: number) => (
-                              <div key={idx} className="flex items-center gap-2">
-                                <span className="text-blue-400 font-bold text-lg select-none">☐</span>
-                                <span className="text-sm text-slate-200">{doc}</span>
+                              <div key={idx} className="flex items-start gap-2">
+                                <span className="text-blue-400 font-bold text-base leading-none select-none mt-0.5">☐</span>
+                                <span className="text-xs sm:text-sm text-slate-200 break-words-all">{doc}</span>
                               </div>
                             ));
                           })()}
@@ -1200,8 +1201,8 @@ export default function CitizenPortal() {
                       </div>
                     )}
 
-                    <div className="flex flex-col gap-1.5 mt-2">
-                      <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wide">அதிகாரப்பூர்வ விண்ணப்பம் (Official Application)</h4>
+                    <div className="flex flex-col gap-1.5 mt-1">
+                      <h4 className="text-[11px] sm:text-xs font-bold text-slate-400 uppercase tracking-wide">அதிகாரப்பூர்வ விண்ணப்பம் (Official Application)</h4>
                       {selectedScheme.scheme.officialLink ? (
                         <a
                           href={
@@ -1212,12 +1213,12 @@ export default function CitizenPortal() {
                           }
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="w-full py-3.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-center text-sm transition shadow-lg active:scale-98 flex items-center justify-center gap-2 cursor-pointer"
+                          className="w-full py-3.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-center text-xs sm:text-sm transition shadow-lg active:scale-98 flex items-center justify-center gap-2 cursor-pointer"
                         >
                           APPLY NOW →
                         </a>
                       ) : (
-                        <div className="w-full py-3.5 rounded-xl bg-slate-900/40 border border-slate-800 text-slate-500 font-medium text-center text-sm">
+                        <div className="w-full py-3 rounded-xl bg-slate-900/40 border border-slate-800 text-slate-500 font-medium text-center text-xs">
                           Official application link not available
                         </div>
                       )}
@@ -1232,31 +1233,31 @@ export default function CitizenPortal() {
                     setApplySuccess(false);
                     setStep("apply");
                   }}
-                  className="mt-2 w-full py-4 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-lg active:scale-98 transition flex items-center justify-center gap-2"
+                  className="mt-2 w-full py-3.5 sm:py-4 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-base sm:text-lg active:scale-98 transition flex items-center justify-center gap-2 shadow-lg shadow-blue-500/20"
                 >
                   <Check size={20} />
                   இப்போதே விண்ணப்பிக்கவும் (Apply Now)
                 </button>
               </div>
             ) : (
-              <div className="flex flex-col gap-4">
+              <div className="flex flex-col gap-3 sm:gap-4">
                 {matchedSchemes.length === 0 ? (
-                  <div className="bg-slate-800/40 border border-slate-700 rounded-2xl p-8 text-center text-slate-500 font-bold">
+                  <div className="bg-slate-800/40 border border-slate-700 rounded-2xl p-6 sm:p-8 text-center text-slate-500 font-bold text-xs sm:text-sm">
                     தகுதிபெறும் திட்டங்கள் எதுவும் கண்டறியப்படவில்லை. (No matched schemes found.)
                   </div>
                 ) : (
                   matchedSchemes.map((match) => (
                     <div
                       key={match.schemeId}
-                      className="bg-slate-850 hover:bg-slate-800 border border-slate-700/80 rounded-2xl p-5 shadow cursor-pointer hover:border-blue-500/40 transition group flex flex-col gap-3"
+                      className="bg-slate-850 hover:bg-slate-800 border border-slate-700/80 rounded-2xl p-4 sm:p-5 shadow cursor-pointer hover:border-blue-500/40 transition group flex flex-col gap-2.5 sm:gap-3"
                       onClick={() => viewSchemeDetails(match)}
                     >
                       <div className="flex justify-between items-start gap-2">
-                        <h3 className="font-bold text-base leading-snug group-hover:text-blue-400 transition flex-1">{match.schemeName}</h3>
+                        <h3 className="font-bold text-sm sm:text-base leading-snug group-hover:text-blue-400 transition flex-1 break-words-all">{match.schemeName}</h3>
 
-                        <div className="flex items-center gap-2 shrink-0">
-                          <span className="px-2 py-1 bg-blue-600/20 border border-blue-500/20 text-blue-300 rounded text-[10px] font-bold shadow-inner">
-                            பொருத்தம்: {match.score}%
+                        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+                          <span className="px-2 py-0.5 sm:py-1 bg-blue-600/20 border border-blue-500/20 text-blue-300 rounded text-[9px] sm:text-[10px] font-bold shadow-inner">
+                            {match.score}%
                           </span>
 
                           <button
@@ -1265,7 +1266,7 @@ export default function CitizenPortal() {
                               const reasonText = match.reasons.length > 0 ? match.reasons[0] : "";
                               speakTamil(`${match.schemeName}. ${reasonText}`);
                             }}
-                            className="w-8 h-8 rounded-full bg-slate-700/60 hover:bg-slate-600 flex items-center justify-center transition active:scale-90"
+                            className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-slate-700/60 hover:bg-slate-600 flex items-center justify-center transition active:scale-90"
                             aria-label="இந்த திட்டத்தை பேசிக் காட்டு (Speak this scheme)"
                             title="Speak this scheme"
                           >
@@ -1274,11 +1275,11 @@ export default function CitizenPortal() {
                         </div>
                       </div>
 
-                      <p className="text-xs text-slate-400 line-clamp-2">
+                      <p className="text-xs text-slate-400 line-clamp-2 break-words-all">
                         {match.reasons.length > 0 ? match.reasons[0] : "விபரங்களைக் காண தட்டவும்."}
                       </p>
 
-                      <div className="flex items-center justify-between border-t border-slate-700/40 pt-3 mt-1 text-xs text-blue-400 font-bold">
+                      <div className="flex items-center justify-between border-t border-slate-700/40 pt-2.5 mt-0.5 text-xs text-blue-400 font-bold">
                         <span>விவரம் & கேள்விகள்</span>
                         <Play size={12} className="group-hover:translate-x-1 transition" />
                       </div>
@@ -1292,26 +1293,26 @@ export default function CitizenPortal() {
 
         {/* STEP 6: APPLY WIZARD */}
         {step === "apply" && selectedScheme && (
-          <div className="w-full flex flex-col gap-6 py-4 animate-fade-in">
-            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+          <div className="w-full flex flex-col gap-4 sm:gap-6 py-2 sm:py-4 animate-fade-in">
+            <div className="flex items-center justify-between border-b border-slate-800 pb-3 gap-2">
               <button
                 onClick={() => { voiceAgent?.cancelAll(); setStep("recommendations"); }}
-                className="flex items-center gap-2 text-slate-400 hover:text-slate-200 font-semibold text-sm"
+                className="flex items-center gap-1.5 sm:gap-2 text-slate-400 hover:text-slate-200 font-semibold text-xs sm:text-sm py-1"
               >
                 <ArrowLeft size={16} />
-                திட்டம் விவரங்கள் (Back)
+                <span>திட்டம் விவரங்கள் (Back)</span>
               </button>
-              <h2 className="font-bold text-slate-300">விண்ணப்பம் சமர்ப்பித்தல்</h2>
+              <h2 className="font-bold text-sm sm:text-base text-slate-300 truncate">விண்ணப்பம் சமர்ப்பித்தல்</h2>
             </div>
 
             {applySuccess ? (
-              <div className="bg-slate-800 border border-slate-700 rounded-2xl p-6 text-center shadow-xl animate-scale-in flex flex-col items-center gap-4">
-                <div className="w-20 h-20 bg-emerald-600/10 border border-emerald-500/30 rounded-full flex items-center justify-center text-emerald-400 mb-2">
-                  <CheckCircle size={48} className="animate-bounce" />
+              <div className="bg-slate-800 border border-slate-700 rounded-2xl p-5 sm:p-6 text-center shadow-xl animate-scale-in flex flex-col items-center gap-3 sm:gap-4">
+                <div className="w-16 h-16 sm:w-20 sm:h-20 bg-emerald-600/10 border border-emerald-500/30 rounded-full flex items-center justify-center text-emerald-400 mb-1">
+                  <CheckCircle size={40} className="animate-bounce sm:w-12 sm:h-12" />
                 </div>
-                <h3 className="text-2xl font-bold text-emerald-400">சமர்ப்பிக்கப்பட்டது!</h3>
-                <p className="text-sm text-slate-300 leading-relaxed max-w-sm">
-                  உங்கள் விண்ணப்பம் வெற்றிகரமாகப் பதிவுசெய்யப்பட்டது. உங்கள் விண்ணப்ப எண்: <span className="font-mono text-blue-400 font-bold block text-lg mt-1">{appNumber}</span>
+                <h3 className="text-xl sm:text-2xl font-bold text-emerald-400">சமர்ப்பிக்கப்பட்டது!</h3>
+                <p className="text-xs sm:text-sm text-slate-300 leading-relaxed max-w-sm px-2">
+                  உங்கள் விண்ணப்பம் வெற்றிகரமாகப் பதிவுசெய்யப்பட்டது. உங்கள் விண்ணப்ப எண்: <span className="font-mono text-blue-400 font-bold block text-base sm:text-lg mt-1">{appNumber}</span>
                 </p>
 
                 <button
@@ -1320,34 +1321,34 @@ export default function CitizenPortal() {
                     setSelectedScheme(null);
                     setUploadedDocs({});
                   }}
-                  className="mt-4 w-full py-4 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-lg transition shadow-lg active:scale-98"
+                  className="mt-3 w-full py-3.5 sm:py-4 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-base sm:text-lg transition shadow-lg active:scale-98"
                 >
                   முதன்மைப் பக்கத்திற்குச் செல்லவும் (Go to Dashboard)
                 </button>
               </div>
             ) : (
-              <div className="flex flex-col gap-5 bg-slate-800 border border-slate-700 rounded-2xl p-6 shadow-xl">
+              <div className="flex flex-col gap-4 sm:gap-5 bg-slate-800 border border-slate-700 rounded-2xl p-4 sm:p-6 shadow-xl">
                 <div>
-                  <h3 className="font-bold text-base line-clamp-1">{selectedScheme.schemeName}</h3>
-                  <p className="text-xs text-slate-400 mt-1 uppercase tracking-wider font-semibold">தேவைப்படும் ஆவணங்களை பதிவேற்றவும் (Upload Documents)</p>
+                  <h3 className="font-bold text-sm sm:text-base line-clamp-2 break-words-all">{selectedScheme.schemeName}</h3>
+                  <p className="text-[10px] sm:text-xs text-slate-400 mt-1 uppercase tracking-wider font-semibold">தேவைப்படும் ஆவணங்களை பதிவேற்றவும் (Upload Documents)</p>
                 </div>
 
-                <div className="flex flex-col gap-4 border-y border-slate-700/80 py-4">
+                <div className="flex flex-col gap-3 border-y border-slate-700/80 py-3.5">
                   {(JSON.parse(selectedScheme.scheme?.requiredDocuments || "[]") as string[]).map((doc, idx) => (
                     <div
                       key={idx}
-                      className="bg-slate-900 border border-slate-700 rounded-xl p-4 flex items-center justify-between gap-3"
+                      className="bg-slate-900 border border-slate-700 rounded-xl p-3 sm:p-4 flex flex-col xs:flex-row sm:flex-row xs:items-center sm:items-center justify-between gap-2.5 sm:gap-3"
                     >
-                      <div className="flex items-center gap-3">
-                        <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold ${uploadedDocs[doc] ? "bg-emerald-600 text-white" : "bg-slate-700 text-slate-400"
+                      <div className="flex items-start gap-2.5 sm:gap-3 min-w-0">
+                        <div className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0 mt-0.5 ${uploadedDocs[doc] ? "bg-emerald-600 text-white" : "bg-slate-700 text-slate-400"
                           }`}>
                           {uploadedDocs[doc] ? <Check size={14} /> : idx + 1}
                         </div>
-                        <div className="flex flex-col">
-                          <span className="font-bold text-sm text-slate-200">{doc}</span>
+                        <div className="flex flex-col min-w-0">
+                          <span className="font-bold text-xs sm:text-sm text-slate-200 break-words-all">{doc}</span>
                           {capturedPhotos[doc] && (
                             <span className="text-[10px] text-emerald-400 flex items-center gap-1 font-semibold mt-0.5">
-                              ✓ படம் இணைக்கப்பட்டுள்ளது (Photo attached)
+                              ✓ படம் இணைக்கப்பட்டுள்ளது
                             </span>
                           )}
                         </div>
@@ -1355,13 +1356,13 @@ export default function CitizenPortal() {
 
                       <button
                         onClick={() => handlePhotoCapture(doc)}
-                        className={`h-12 px-4 rounded-lg flex items-center gap-1.5 text-xs font-bold transition border ${uploadedDocs[doc]
+                        className={`h-10 sm:h-11 px-3 sm:px-4 rounded-lg flex items-center justify-center gap-1.5 text-xs font-bold transition border shrink-0 self-end xs:self-auto ${uploadedDocs[doc]
                           ? "bg-slate-800 border-slate-700 text-emerald-400 hover:bg-slate-750"
                           : "bg-blue-600/10 border-blue-500/20 text-blue-400 hover:bg-blue-600/20"
                           }`}
                         aria-label={`${doc} புகைப்படம் எடுக்கவும் (Take photo of ${doc})`}
                       >
-                        <Camera size={16} />
+                        <Camera size={15} />
                         <span>{uploadedDocs[doc] ? "மாற்றுக" : "படம் எடு"}</span>
                       </button>
                     </div>
@@ -1373,7 +1374,7 @@ export default function CitizenPortal() {
 
                   <button
                     onClick={handleApplySubmit}
-                    className="w-full py-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 disabled:opacity-40 disabled:hover:bg-emerald-600 text-white font-bold text-lg active:scale-98 transition"
+                    className="w-full py-3.5 sm:py-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 disabled:opacity-40 disabled:hover:bg-emerald-600 text-white font-bold text-base sm:text-lg active:scale-98 transition shadow-lg shadow-emerald-500/20"
                     disabled={
                       !(JSON.parse(selectedScheme.scheme?.requiredDocuments || "[]") as string[]).every(d => uploadedDocs[d])
                     }
@@ -1390,23 +1391,23 @@ export default function CitizenPortal() {
 
       {/* CAMERA CAPTURE MODAL OVERLAY */}
       {isCameraOpen && activeCaptureDoc && (
-        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in">
-          <div className="w-full max-w-md bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-2xl flex flex-col gap-4 relative animate-scale-in">
+        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 animate-fade-in">
+          <div className="w-full max-w-md bg-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-6 shadow-2xl flex flex-col gap-3 sm:gap-4 relative animate-scale-in max-h-[92vh] overflow-y-auto">
             <button
               type="button"
               onClick={handleCloseCamera}
-              className="absolute right-4 top-4 p-2 bg-slate-800 hover:bg-slate-750 rounded-full text-slate-400 transition"
+              className="absolute right-3 top-3 sm:right-4 sm:top-4 p-2 bg-slate-800 hover:bg-slate-750 rounded-full text-slate-400 transition"
               aria-label="மூடுக (Close camera)"
             >
               <Check size={16} className="rotate-45" />
             </button>
 
-            <div>
-              <h3 className="text-base font-bold text-slate-200">ஆவணம் புகைப்படம் எடுத்தல்</h3>
-              <p className="text-xs text-slate-400 mt-0.5">{activeCaptureDoc}</p>
+            <div className="pr-8">
+              <h3 className="text-sm sm:text-base font-bold text-slate-200">ஆவணம் புகைப்படம் எடுத்தல்</h3>
+              <p className="text-xs text-slate-400 mt-0.5 break-words-all">{activeCaptureDoc}</p>
             </div>
 
-            <div className="relative w-full aspect-video rounded-xl bg-slate-950 border border-slate-850 overflow-hidden flex items-center justify-center shadow-inner">
+            <div className="relative w-full aspect-4/3 sm:aspect-video rounded-xl bg-slate-950 border border-slate-850 overflow-hidden flex items-center justify-center shadow-inner">
               {cameraError ? (
                 <div className="text-center p-4 flex flex-col items-center gap-2">
                   <div className="w-10 h-10 rounded-full bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-rose-400">
@@ -1430,7 +1431,7 @@ export default function CitizenPortal() {
               )}
             </div>
 
-            <div className="flex gap-3">
+            <div className="flex gap-2.5 sm:gap-3">
               {capturedPreview ? (
                 <>
                   <button
@@ -1453,7 +1454,7 @@ export default function CitizenPortal() {
                   type="button"
                   onClick={handleCapture}
                   disabled={!!cameraError}
-                  className="w-full py-3 bg-blue-600 hover:bg-blue-500 disabled:opacity-40 disabled:hover:bg-blue-600 text-white font-bold rounded-xl active:scale-98 transition text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg shadow-blue-500/10"
+                  className="w-full py-3.5 bg-blue-600 hover:bg-blue-500 disabled:opacity-40 disabled:hover:bg-blue-600 text-white font-bold rounded-xl active:scale-98 transition text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg shadow-blue-500/10"
                 >
                   <Camera size={16} />
                   புகைப்படம் எடு (Capture Photo)
@@ -1466,21 +1467,21 @@ export default function CitizenPortal() {
 
       {/* Floating Bottom mic button on non-chat active steps */}
       {step !== "chat" && step !== "auth" && step !== "otp" && (
-        <div className="fixed bottom-6 right-6 z-40 animate-fade-in">
+        <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-40 animate-fade-in">
           <button
             onClick={startConversation}
-            className="w-14 h-14 rounded-full bg-blue-600 hover:bg-blue-500 border border-blue-400/40 text-white flex items-center justify-center shadow-2xl active:scale-95 transition"
+            className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-blue-600 hover:bg-blue-500 border border-blue-400/40 text-white flex items-center justify-center shadow-2xl active:scale-95 transition"
             aria-label="துவக்கம் உதவியாளரை அழைக்கவும் (Call Thovakkam Voice Assistant)"
             title="Start Voice Assistant"
           >
-            <Mic size={24} className="animate-pulse" />
+            <Mic size={22} className="animate-pulse sm:w-6 sm:h-6" />
           </button>
         </div>
       )}
 
       {/* Footer copyright */}
-      <footer className="text-center py-6 text-[10px] text-slate-600 border-t border-slate-800 bg-slate-950/20 mt-auto">
-        © 2026 தமிழ்நாடு அரசு. Thovakkam AI — Voice-First Schemes Assistant. (MVP)
+      <footer className="text-center py-4 sm:py-6 px-4 text-[10px] text-slate-600 border-t border-slate-800 bg-slate-950/20 mt-auto">
+        © 2026 தமிழ்நாடு அரசு. Thuvakkam AI — Voice-First Schemes Assistant.
       </footer>
     </div>
   );
