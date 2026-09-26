@@ -638,9 +638,11 @@ export default function CitizenPortal() {
       {/* Top Header */}
       <header className="flex items-center justify-between px-3 sm:px-6 py-3 sm:py-4 bg-slate-800/80 border-b border-slate-700 backdrop-blur sticky top-0 z-30 w-full">
         <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
-          <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-blue-600 flex items-center justify-center font-bold text-white text-base sm:text-lg shadow-lg shadow-blue-500/20 shrink-0">
-            த
-          </div>
+          <img
+            src="/logo.png"
+            alt="THUVAKKAM AI Logo"
+            className="w-9 h-9 sm:w-10 sm:h-10 rounded-full object-cover shadow-lg shadow-emerald-500/20 shrink-0 border border-emerald-500/40 bg-white"
+          />
           <div className="min-w-0">
             <h1 className="text-lg sm:text-xl font-bold tracking-wide bg-gradient-to-r from-blue-400 to-indigo-300 bg-clip-text text-transparent truncate">
               துவக்கம் AI

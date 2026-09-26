@@ -410,9 +410,11 @@ export default function AdminDashboard() {
       {/* HEADER */}
       <header className="flex items-center justify-between px-3 sm:px-6 py-3 sm:py-4 bg-slate-900 border-b border-slate-800 shadow-md sticky top-0 z-30 w-full">
         <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
-          <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-indigo-600 flex items-center justify-center font-bold text-white text-base sm:text-lg shadow-lg shrink-0">
-            அ
-          </div>
+          <img
+            src="/logo.png"
+            alt="THUVAKKAM AI"
+            className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg object-cover shadow-lg shrink-0 border border-indigo-500/40 bg-white"
+          />
           <div className="min-w-0">
             <h1 className="text-lg sm:text-xl font-bold bg-gradient-to-r from-indigo-400 to-purple-300 bg-clip-text text-transparent truncate">
               அதிகாரிகள் தளம்
