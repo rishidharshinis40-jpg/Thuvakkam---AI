@@ -1204,7 +1204,12 @@ export default function CitizenPortal() {
                       <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wide">அதிகாரப்பூர்வ விண்ணப்பம் (Official Application)</h4>
                       {selectedScheme.scheme.officialLink ? (
                         <a
-                          href={selectedScheme.scheme.officialLink}
+                          href={
+                            selectedScheme.scheme.officialLink.trim().startsWith("http://") ||
+                            selectedScheme.scheme.officialLink.trim().startsWith("https://")
+                              ? selectedScheme.scheme.officialLink.trim()
+                              : `https://${selectedScheme.scheme.officialLink.trim()}`
+                          }
                           target="_blank"
                           rel="noopener noreferrer"
                           className="w-full py-3.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-center text-sm transition shadow-lg active:scale-98 flex items-center justify-center gap-2 cursor-pointer"
